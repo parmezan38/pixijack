@@ -1,9 +1,16 @@
-import { Application, Assets } from "pixi.js";
-import { createDeck, createShuffledDeck, Cards, Card } from "./logic/Cards";
+import { Application, Assets, Sprite } from "pixi.js";
+import {
+    createDeck,
+    createShuffledDeck,
+    CardImageData,
+    Cards,
+    Card
+} from "./logic/Cards";
 
 const BALANCE = 1000;
 const NUM_OF_DECKS = 1; // 4 Deck setup
-
+const CARD_ASSET_PATH = "../../raw-assets/cards/";
+let textures = null;
 let balance = BALANCE;
 
 let deck: Card[] = [];
@@ -15,8 +22,17 @@ export const app = new Application<HTMLCanvasElement>({
 
 window.onload = async (): Promise<void> => {
     document.body.appendChild(app.view);
+    
+    createDeck();
+    console.log(CardImageData);
 
-    createDeck(); // Move to loading part
+    CardImageData.forEach(name => {
+        const path = CARD_ASSET_PATH + name + ".png";
+        Assets.add(name, path)
+        console.log(name + ", " + path);
+    });
+
+    textures = await Assets.load(CardImageData);
 
     initializeValues();
 };

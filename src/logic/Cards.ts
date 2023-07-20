@@ -16,25 +16,23 @@ enum SUITS {
     SPADES = "spades",
 }
 
-const CARD_ASSET_PATH = "/cards";
-
 export type Card = {
     type: CARD_TYPES;
     suit: SUITS;
     value: number;
 };
-
 export type Cards = Card[];
 
 const Deck: Card[] = [];
+
+export const CardImageData: string[] = [];
 
 // Generate cards
 function createNumeralCards() {
     Object.values(SUITS).forEach((value) => {
         for (let i = 2; i < 11; i++) {
             Deck.push(createCard(CARD_TYPES.NUMERAL, value, i));
-
-            loadCard(i, value);
+            CardImageData.push(createFileString(`${i}`, value));
         }
     });
 }
@@ -42,16 +40,14 @@ function createNumeralCards() {
 function createFaceCards() {
     Object.values(SUITS).forEach((suit) => {
         Deck.push(createCard(CARD_TYPES.ACE, suit, 1));
-
-        loadCard("ace", suit);
+        CardImageData.push(createFileString("ace", suit));
 
         Object.values(CARD_TYPES).forEach((cardType) => {
             if (cardType === CARD_TYPES.NUMERAL || cardType === CARD_TYPES.ACE) {
                 return;
             }
             Deck.push(createCard(cardType, suit, 11));
-
-            loadCard(cardType, suit);
+            CardImageData.push(createFileString(cardType, suit));
         });
     });
 }
@@ -62,11 +58,6 @@ function createCard(type: CARD_TYPES, suit: SUITS, value: number) {
 
 function createFileString(name: any, suit: string) {
     return name + "_of_" + suit;
-}
-
-function loadCard(name: any, suit: string) {
-    const string = createFileString(name, suit);
-    const file = CARD_ASSET_PATH + "/" + string + ".png";
 }
 
 function shuffleCards(_deck: Card[]) {
