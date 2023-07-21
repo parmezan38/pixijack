@@ -3,14 +3,17 @@ import {
     createDeck,
     createShuffledDeck,
     CardImageData,
-    Cards,
     Card
 } from "./logic/Cards";
 
+import { Chips } from "./logic/Chips";
+
 const BALANCE = 1000;
 const NUM_OF_DECKS = 1; // 4 Deck setup
-const CARD_ASSET_PATH = "../../raw-assets/cards/";
-let textures = null;
+const ASSET_PATH = "../../raw-assets/";
+
+let textures: Record<string, any>;
+
 let balance = BALANCE;
 
 let deck: Card[] = [];
@@ -24,15 +27,18 @@ window.onload = async (): Promise<void> => {
     document.body.appendChild(app.view);
     
     createDeck();
-    console.log(CardImageData);
-
-    CardImageData.forEach(name => {
-        const path = CARD_ASSET_PATH + name + ".png";
+    CardImageData.forEach((name: string) => {
+        const path = ASSET_PATH + "cards/" + name + ".png";
         Assets.add(name, path)
-        console.log(name + ", " + path);
     });
-
-    textures = await Assets.load(CardImageData);
+    
+    const chipNames = Chips.map(({name}) => name);
+    chipNames.forEach((name: string) => {
+        const path = ASSET_PATH + "chips/" + name + ".png";
+        Assets.add(name, path)
+    });
+    
+    textures = await Assets.load([...chipNames, ...CardImageData]);
 
     initializeValues();
 };
@@ -40,5 +46,4 @@ window.onload = async (): Promise<void> => {
 function initializeValues() {
     balance = BALANCE;
     deck = createShuffledDeck(NUM_OF_DECKS);
-    console.log(deck);
 }
