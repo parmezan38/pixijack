@@ -1,36 +1,29 @@
-import {
-    Application,
-    Assets,
-    State,
-} from "pixi.js";
+import { Application, Assets } from "pixi.js";
 
 import {
     createDeck,
     createShuffledDeck,
-    CardImageData,
-    Card
+    CardImageData
 } from "./logic/Cards";
 
-import {
-    Chips,
-} from "./logic/Chips";
+import { Chips } from "./logic/Chips";
 
 import { WagerState } from "./states/Wager";
 import { Game, GameState } from "./util/HelperTypes";
+import { PlayState } from "./states/Play";
 
 const BALANCE = 1000;
-const NUM_OF_DECKS = 1; // 4 Deck setup
 const ASSET_PATH = "../../raw-assets/";
 
 let game: Game = new Game();
 game.balance = BALANCE;
 game.wager = 0;
-
-let state: GameState = new GameState();
+game.deck = []
+game.state = new GameState();
 
 export const app = new Application<HTMLCanvasElement>({
     resolution: Math.max(window.devicePixelRatio, 2),
-    backgroundColor: 0xffffff,
+    backgroundColor: "#3a8576",
 });
 
 /** Set up a resize function for the app */
@@ -59,6 +52,7 @@ function resize() {
 window.onload = async (): Promise<void> => {
     document.body.appendChild(app.view);
     game.app = app;
+    window.addEventListener('resize', resize);
     
     createDeck();
     CardImageData.forEach((name: string) => {
@@ -80,12 +74,14 @@ window.onload = async (): Promise<void> => {
     resize();
     initializeValues();
     
-    state = new WagerState(game);
-    state.startState();
+    game.wagerState = new WagerState(game);
+    game.playState = new PlayState(game);
+
+    game.state = game.wagerState;
+    game.state.start();
 };
 
 function initializeValues() {
     game.balance = BALANCE;
-    createShuffledDeck(NUM_OF_DECKS);
 }
 

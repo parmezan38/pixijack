@@ -19,7 +19,7 @@ export type ChipSlot = {
     sprite?: Sprite
 }
 
-export const WageredChips: ChipSlot[] = [];
+export let WageredChips: ChipSlot[] = [];
 
 function createSlot(chip: Chip) {
     const slot: ChipSlot = {
@@ -53,9 +53,16 @@ export const removeChipFromWageredSlot = (chip: Chip) => {
             WageredChips[i].count--;
             return false
         } else {
-            WageredChips[i].sprite.destroy();
+            WageredChips[i].sprite!.destroy();
             WageredChips.splice(i, 1);
             return true;
         }
     }
 };
+
+export const resetWageredChips = () => {
+    for(let i=0; i<WageredChips.length; i++) {
+        WageredChips[i].sprite?.destroy()
+    }
+    WageredChips = [];
+}

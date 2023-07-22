@@ -1,28 +1,44 @@
 import { Container, Sprite, Text } from "pixi.js";
 import { Game, Position, GameState } from "../util/HelperTypes";
-import { Chip, Chips, WageredChips, addChipToWageredSlot, removeChipFromWageredSlot } from "../logic/Chips";
+import {
+    Chip,
+    Chips,
+    WageredChips,
+    addChipToWageredSlot,
+    removeChipFromWageredSlot,
+    resetWageredChips
+} from "../logic/Chips";
 
 export class WagerState extends GameState {
     game: Game = new Game();
-    
+
     constructor(_game: Game) {
         super();
         this.game = _game;
+    }
+    
+    public start() {
+        console.log("WagerState");
 
-        this.startState = () => {
-            this.selectableChips = []
-            this.balanceText = new Text(""),
-            this.wagerText = new Text(""),
-            this.container = new Container()
-            this.game.app.stage.addChild(this.container);
-            const startPos: Position = {
-                x: 150,
-                y: 600 
-            }
-            this.createSelectableChips(startPos);
-            this.addDealButton();
-            this.addText();    
+        this.container = new Container();
+        this.game.app.stage.addChild(this.container);
+
+        this.initializeValues();
+
+        const startPos: Position = {
+            x: 150,
+            y: 600 
         }
+        this.createSelectableChips(startPos);
+        this.addDealButton();
+        this.addText();
+    }
+
+    private initializeValues() {
+        resetWageredChips();
+        this.selectableChips = [];
+        this.balanceText = new Text("");
+        this.wagerText = new Text("");
     }
 
     private createSelectableChips(startPos: Position) {
@@ -35,7 +51,7 @@ export class WagerState extends GameState {
             selectChip.y = startPos.y;
             selectChip.interactive = true;
             selectChip.onclick = () => {this.wagerChip(Chips[i])}
-            this.selectableChips.push(selectChip);
+            this.selectableChips!.push(selectChip);
             this.container.addChild(selectChip);
         }
     }
@@ -105,7 +121,19 @@ export class WagerState extends GameState {
     
     private startDealState() {
         if (this.game.wager === 0) return;
-        console.log("Can deal");
+        this.new(this.game.playState);
+    }
+
+    public new(newState: GameState) {
+        this.destroy();
+        this.game.state = newState;
+        this.game.state.start();
+    }
+    
+    public destroy() {
+        resetWageredChips();
+        this.container.removeAllListeners();
+        this.container.removeChildren();
     }
 }
 
