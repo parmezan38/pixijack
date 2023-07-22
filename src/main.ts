@@ -1,4 +1,12 @@
-import { Application, Assets, Sprite, Text } from "pixi.js";
+import {
+    Application,
+    Assets,
+    Container,
+    Graphics,
+    Sprite,
+    Text
+} from "pixi.js";
+
 import {
     createDeck,
     createShuffledDeck,
@@ -10,10 +18,10 @@ import {
     addChipToWageredSlot,
     Chip,
     Chips,
-    ChipSlot,
     WageredChips,
     removeChipFromWageredSlot
 } from "./logic/Chips";
+
 import { Position } from "./util/HelperTypes";
 
 const BALANCE = 1000;
@@ -22,10 +30,21 @@ const ASSET_PATH = "../../raw-assets/";
 
 let textures: Record<string, any>;
 let balance = BALANCE;
-let balanceText: Text;
+let wager = 0;
+
+const wagerState: {
+    balanceText: Text,
+    wagerText: Text,
+    selectableChips: Sprite[],
+    container: Container
+} = {
+    balanceText: new Text,
+    wagerText: new Text,
+    selectableChips: [],
+    container: new Container()
+}
 
 let deck: Card[] = [];
-const selectableChips: Sprite[] = [];
 
 export const app = new Application<HTMLCanvasElement>({
     resolution: Math.max(window.devicePixelRatio, 2),
@@ -68,26 +87,33 @@ window.onload = async (): Promise<void> => {
         const path = ASSET_PATH + "chips/" + name + ".png";
         Assets.add(name, path)
     });
-    textures = await Assets.load([...chipNames, ...CardImageData]);
+    const uiTextures = ["deal_button"];
+    uiTextures.forEach((name: string) => {
+        const path = ASSET_PATH + "ui/" + name + ".png";
+        Assets.add(name, path)
+    });
+    textures = await Assets.load([...chipNames, ...CardImageData, ...uiTextures]);
 
     resize();
-    addPlayerBalanceText();
+    addText();
     initializeValues();
+    
+    startWagerState();
 };
 
 function initializeValues() {
     balance = BALANCE;
     deck = createShuffledDeck(NUM_OF_DECKS);
-
-    wagering();
 }
 
-function wagering() {
+function startWagerState() {
+    app.stage.addChild(wagerState.container);
     const startPos: Position = {
-        x: 200,
-        y: 500 
+        x: 150,
+        y: 600 
     }
     createSelectableChips(startPos);
+    addDealButton();
 }
 
 function createSelectableChips(startPos: Position) {
@@ -100,8 +126,8 @@ function createSelectableChips(startPos: Position) {
         selectChip.y = startPos.y;
         selectChip.interactive = true;
         selectChip.onclick = () => {wagerChip(Chips[i])}
-        selectableChips.push(selectChip);
-        app.stage.addChild(selectChip);
+        wagerState.selectableChips.push(selectChip);
+        wagerState.container.addChild(selectChip);
     }
 }
 
@@ -111,42 +137,65 @@ function createWageredChip(chip: Chip, startPos: Position, i: number) {
     wageredChip.scale.x = 0.5;
     wageredChip.scale.y = 0.5;
     wageredChip.x = startPos.x + (i+1)*150;
-    wageredChip.y = 300;
+    wageredChip.y = startPos.y;
     wageredChip.interactive = true;
     wageredChip.onclick = () => {removeChip(chip)}
     WageredChips[i].sprite = wageredChip;
-    app.stage.addChild(wageredChip);
+    wagerState.container.addChild(wageredChip);
 }
 
 function wagerChip(chip: Chip) {
     const slot = addChipToWageredSlot(chip);
     balance -= chip.value;
-    updatePlayerBalanceText();
+    wager += chip.value;
+    updateText();
     if (WageredChips[slot].count <= 1) {
         const startPos: Position = {
-            x: 200,
-            y: 500 
+            x: 150,
+            y: 450 
         }
         createWageredChip(chip, startPos, slot);
     }
-    console.log(WageredChips);
 }
 
 function removeChip(chip: Chip) {
     removeChipFromWageredSlot(chip);
     balance += chip.value;
-    updatePlayerBalanceText();
-    console.log(WageredChips);
+    wager -= chip.value;
+    updateText();
 }
 
-function addPlayerBalanceText() {
-    balanceText = new Text('Player balance: ' + balance);
-    balanceText.x = 50;
-    balanceText.y = 100;
-    app.stage.addChild(balanceText);
+function addText() {
+    wagerState.balanceText = new Text('Player balance: ' + balance);
+    wagerState.balanceText.x = 50;
+    wagerState.balanceText.y = 100;
+    wagerState.container.addChild(wagerState.balanceText);
+    
+    wagerState.wagerText = new Text('Wager: ' + wager);
+    wagerState.wagerText.x = 50;
+    wagerState.wagerText.y = 150;
+    wagerState.container.addChild(wagerState.wagerText);
 }
 
-function updatePlayerBalanceText() {
-    balanceText.text = 'Player balance: ' + balance;
+function updateText() {
+    wagerState.balanceText.text = 'Player balance: ' + balance;
+    wagerState.wagerText.text = 'Wager: ' + wager;
+}
+
+function addDealButton() {
+    const dealButton = Sprite.from(textures["deal_button"]);
+    dealButton.anchor.set(0.5);
+    dealButton.scale.x = 1;
+    dealButton.scale.y = 1;
+    dealButton.x = 500;
+    dealButton.y = 100;
+    dealButton.interactive = true;
+    dealButton.onclick = () => {startDealState()}
+    wagerState.container.addChild(dealButton);
+}
+
+function startDealState() {
+    if (wager === 0) return;
+    console.log("Can deal");
 }
 
