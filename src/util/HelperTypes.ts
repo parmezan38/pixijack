@@ -24,7 +24,7 @@ export class GameState {
     public new(newState: GameState) {}
 }
 
-export type Position = {
+export type Vector2 = {
     x: number,
     y: number,
 }

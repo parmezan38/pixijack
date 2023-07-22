@@ -1,5 +1,5 @@
 import { Container, Sprite, Text } from "pixi.js";
-import { Game, Position, GameState } from "../util/HelperTypes";
+import { Game, Vector2, GameState } from "../util/HelperTypes";
 import {
     Chip,
     Chips,
@@ -25,7 +25,7 @@ export class WagerState extends GameState {
 
         this.initializeValues();
 
-        const startPos: Position = {
+        const startPos: Vector2 = {
             x: 150,
             y: 600 
         }
@@ -41,7 +41,7 @@ export class WagerState extends GameState {
         this.wagerText = new Text("");
     }
 
-    private createSelectableChips(startPos: Position) {
+    private createSelectableChips(startPos: Vector2) {
         for(let i=0; i<Chips.length; i++) {
             const selectChip = Sprite.from(this.game.textures[Chips[i].name]);
             selectChip.anchor.set(0.5);
@@ -56,7 +56,7 @@ export class WagerState extends GameState {
         }
     }
     
-    private createWageredChip(chip: Chip, startPos: Position, i: number) {
+    private createWageredChip(chip: Chip, startPos: Vector2, i: number) {
         const wageredChip = Sprite.from(this.game.textures[chip.name]);
         wageredChip.anchor.set(0.5);
         wageredChip.scale.x = 0.5;
@@ -75,7 +75,7 @@ export class WagerState extends GameState {
         this.game.wager += chip.value;
         this.updateText();
         if (WageredChips[slot].count <= 1) {
-            const startPos: Position = {
+            const startPos: Vector2 = {
                 x: 150,
                 y: 450 
             }

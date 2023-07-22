@@ -17,6 +17,7 @@ enum SUITS {
 }
 
 export type Card = {
+    name: string, 
     type: CARD_TYPES;
     suit: SUITS;
     value: number;
@@ -31,33 +32,34 @@ export const CardImageData: string[] = [];
 function createNumeralCards() {
     Object.values(SUITS).forEach((value) => {
         for (let i = 2; i < 11; i++) {
-            Deck.push(createCard(CARD_TYPES.NUMERAL, value, i));
-            CardImageData.push(createFileString(`${i}`, value));
+            const card = createCard(CARD_TYPES.NUMERAL, value, i) 
+            Deck.push(card);
+            CardImageData.push(card.name);
         }
     });
 }
 
 function createFaceCards() {
     Object.values(SUITS).forEach((suit) => {
-        Deck.push(createCard(CARD_TYPES.ACE, suit, 1));
-        CardImageData.push(createFileString("ace", suit));
+        const card = createCard(CARD_TYPES.ACE, suit, 1) 
+        Deck.push(card);
+        CardImageData.push(card.name);
 
         Object.values(CARD_TYPES).forEach((cardType) => {
             if (cardType === CARD_TYPES.NUMERAL || cardType === CARD_TYPES.ACE) {
                 return;
             }
-            Deck.push(createCard(cardType, suit, 11));
-            CardImageData.push(createFileString(cardType, suit));
+            const card = createCard(cardType, suit, 11)
+            Deck.push(card);
+            CardImageData.push(card.name);
         });
     });
 }
 
 function createCard(type: CARD_TYPES, suit: SUITS, value: number) {
-    return { type, suit, value };
-}
-
-function createFileString(name: any, suit: string) {
-    return name + "_of_" + suit;
+    const str = type === CARD_TYPES.NUMERAL ? value : type;
+    const name = `${str}_of_${suit}`;
+    return { name, type, suit, value };
 }
 
 function shuffleCards(_deck: Card[]) {
