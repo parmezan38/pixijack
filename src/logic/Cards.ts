@@ -32,12 +32,10 @@ export const CARD_DIMENSIONS: Vector2 = {
     x: 500 * CARD_SCALE,
     y: 726 * CARD_SCALE
 }
-
+export const CARD_DISTANCE: number = CARD_DIMENSIONS.x * 0.3;
 export const CARD_POSITIONS: Vector2[] = [
-    { x: MIDDLE.x - CARD_DIMENSIONS.x * 0.3, y: MIDDLE.y + 180 }, // P 1. 
-    { x: MIDDLE.x - CARD_DIMENSIONS.x * 0.3, y: MIDDLE.y - 180 }, // D 1.
-    { x: MIDDLE.x + CARD_DIMENSIONS.x * 0.3, y: MIDDLE.y + 180 }, // P 2.
-    { x: MIDDLE.x + CARD_DIMENSIONS.x * 0.3, y: MIDDLE.y - 180 }, // D 2.
+    { x: MIDDLE.x - CARD_DIMENSIONS.x, y: MIDDLE.y + 180 }, // Player 
+    { x: MIDDLE.x - CARD_DIMENSIONS.x, y: MIDDLE.y - 180 } // Dealer
 ]
 
 const Deck: Card[] = [];

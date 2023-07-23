@@ -2,7 +2,6 @@ import { Application, Assets } from "pixi.js";
 
 import {
     createDeck,
-    createShuffledDeck,
     CardImageData
 } from "./logic/Cards";
 
