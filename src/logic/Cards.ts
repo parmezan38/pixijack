@@ -2,7 +2,7 @@ import { Vector2 } from "../util/HelperTypes";
 import { MIDDLE } from "../visual/UI";
 
 // Define cards
-enum CARD_TYPES {
+export enum CARD_TYPES {
     JACK = "jack",
     QUEEN = "queen",
     KING = "king",
@@ -32,10 +32,10 @@ export const CARD_DIMENSIONS: Vector2 = {
     x: 500 * CARD_SCALE,
     y: 726 * CARD_SCALE
 }
-export const CARD_DISTANCE: number = CARD_DIMENSIONS.x * 0.3;
+export const CARD_DISTANCE: number = CARD_DIMENSIONS.x * 0.4;
 export const CARD_POSITIONS: Vector2[] = [
-    { x: MIDDLE.x - CARD_DIMENSIONS.x, y: MIDDLE.y + 180 }, // Player 
-    { x: MIDDLE.x - CARD_DIMENSIONS.x, y: MIDDLE.y - 180 } // Dealer
+    { x: MIDDLE.x - CARD_DIMENSIONS.x*0.2, y: MIDDLE.y + 180 }, // Player 
+    { x: MIDDLE.x - CARD_DIMENSIONS.x*0.2, y: MIDDLE.y - 180 } // Dealer
 ]
 
 const Deck: Card[] = [];
@@ -55,7 +55,7 @@ function createNumeralCards() {
 
 function createFaceCards() {
     Object.values(SUITS).forEach(suit => {
-        const card = createCard(CARD_TYPES.ACE, suit, 1) 
+        const card = createCard(CARD_TYPES.ACE, suit, 11) 
         Deck.push(card);
         CardImageData.push(card.name);
 
@@ -63,7 +63,7 @@ function createFaceCards() {
             if (cardType === CARD_TYPES.NUMERAL || cardType === CARD_TYPES.ACE) {
                 return;
             }
-            const card = createCard(cardType, suit, 11)
+            const card = createCard(cardType, suit, 10)
             Deck.push(card);
             CardImageData.push(card.name);
         });

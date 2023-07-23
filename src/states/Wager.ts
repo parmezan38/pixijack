@@ -116,7 +116,7 @@ export class WagerState extends GameState {
         dealButton.scale.x = 1;
         dealButton.scale.y = 1;
         dealButton.x = MIDDLE.x;
-        dealButton.y = 100;
+        dealButton.y = MIDDLE.y;
         dealButton.interactive = true;
         dealButton.onclick = () => {this.startDealState()}
         this.container.addChild(dealButton);

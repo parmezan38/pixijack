@@ -58,21 +58,21 @@ window.onload = async (): Promise<void> => {
     window.addEventListener('resize', resize);
     
     createDeck();
-    CardImageData.forEach((name: string) => {
-        const path = ASSET_PATH + "cards/" + name + ".png";
-        Assets.add(name, path)
-    });
+    CardImageData.forEach((name: string) => createAsset(name, "cards"));
+
     const chipNames = Chips.map(({name}) => name);
-    chipNames.forEach((name: string) => {
-        const path = ASSET_PATH + "chips/" + name + ".png";
-        Assets.add(name, path)
-    });
-    BUTTON_NAMES.forEach((name: string) => {
-        const path = ASSET_PATH + "ui/" + name + ".png";
-        Assets.add(name, path)
-    });
+    chipNames.forEach((name: string) => createAsset(name, "chips"));
     
-    game.textures = await Assets.load([...chipNames, ...CardImageData, ...BUTTON_NAMES]);
+    BUTTON_NAMES.forEach((name: string) => createAsset(name, "ui"));
+
+    createAsset("back_card", "cards");
+
+    game.textures = await Assets.load([
+        ...chipNames,
+        ...CardImageData,
+        ...BUTTON_NAMES,
+        "back_card"
+    ]);
 
     resize();
     initializeValues();
@@ -88,3 +88,7 @@ function initializeValues() {
     game.balance = BALANCE;
 }
 
+function createAsset(name: string, folder: string) {
+    const path = `${ASSET_PATH}${folder}/${name}.png`;
+    Assets.add(name, path);
+}
