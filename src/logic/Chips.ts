@@ -1,4 +1,11 @@
 import { Sprite } from "pixi.js"
+import { Vector2 } from "../util/HelperTypes";
+
+export const CHIP_SCALE: number = 0.4;
+export const CHIP_DIMENSIONS: Vector2 = {
+    x: 256 * CHIP_SCALE,
+    y: 256 * CHIP_SCALE
+}
 
 export type Chip = {
     name: string,

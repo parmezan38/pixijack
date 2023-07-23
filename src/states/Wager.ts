@@ -1,6 +1,8 @@
 import { Container, Sprite, Text } from "pixi.js";
 import { Game, Vector2, GameState } from "../util/HelperTypes";
 import {
+    CHIP_DIMENSIONS,
+    CHIP_SCALE,
     Chip,
     Chips,
     WageredChips,
@@ -8,6 +10,7 @@ import {
     removeChipFromWageredSlot,
     resetWageredChips
 } from "../logic/Chips";
+import { MIDDLE } from "../visual/UI";
 
 export class WagerState extends GameState {
     game: Game = new Game();
@@ -26,7 +29,7 @@ export class WagerState extends GameState {
         this.initializeValues();
 
         const startPos: Vector2 = {
-            x: 150,
+            x: MIDDLE.x - 3*CHIP_DIMENSIONS.x-CHIP_DIMENSIONS.x/2,
             y: 600 
         }
         this.createSelectableChips(startPos);
@@ -45,9 +48,9 @@ export class WagerState extends GameState {
         for(let i=0; i<Chips.length; i++) {
             const selectChip = Sprite.from(this.game.textures[Chips[i].name]);
             selectChip.anchor.set(0.5);
-            selectChip.scale.x = 0.5;
-            selectChip.scale.y = 0.5;
-            selectChip.x = startPos.x + (i+1)*150;
+            selectChip.scale.x = CHIP_SCALE;
+            selectChip.scale.y = CHIP_SCALE;
+            selectChip.x = startPos.x + (i+1)*CHIP_DIMENSIONS.x*1.2;
             selectChip.y = startPos.y;
             selectChip.interactive = true;
             selectChip.onclick = () => {this.wagerChip(Chips[i])}
@@ -59,9 +62,9 @@ export class WagerState extends GameState {
     private createWageredChip(chip: Chip, startPos: Vector2, i: number) {
         const wageredChip = Sprite.from(this.game.textures[chip.name]);
         wageredChip.anchor.set(0.5);
-        wageredChip.scale.x = 0.5;
-        wageredChip.scale.y = 0.5;
-        wageredChip.x = startPos.x + (i+1)*150;
+        wageredChip.scale.x = CHIP_SCALE;
+        wageredChip.scale.y = CHIP_SCALE;
+        wageredChip.x = startPos.x + (i+1)*CHIP_DIMENSIONS.x*1.2;
         wageredChip.y = startPos.y;
         wageredChip.interactive = true;
         wageredChip.onclick = () => {this.removeChip(chip)}
@@ -76,8 +79,8 @@ export class WagerState extends GameState {
         this.updateText();
         if (WageredChips[slot].count <= 1) {
             const startPos: Vector2 = {
-                x: 150,
-                y: 450 
+                x: MIDDLE.x - 3*CHIP_DIMENSIONS.x-CHIP_DIMENSIONS.x/2,
+                y: 480 
             }
             this.createWageredChip(chip, startPos, slot);
         }
@@ -112,7 +115,7 @@ export class WagerState extends GameState {
         dealButton.anchor.set(0.5);
         dealButton.scale.x = 1;
         dealButton.scale.y = 1;
-        dealButton.x = 500;
+        dealButton.x = MIDDLE.x;
         dealButton.y = 100;
         dealButton.interactive = true;
         dealButton.onclick = () => {this.startDealState()}

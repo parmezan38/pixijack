@@ -11,6 +11,7 @@ import { Chips } from "./logic/Chips";
 import { WagerState } from "./states/Wager";
 import { Game, GameState } from "./util/HelperTypes";
 import { PlayState } from "./states/Play";
+import { BUTTON_NAMES, MIDDLE } from "./visual/UI";
 
 const BALANCE = 1000;
 const ASSET_PATH = "../../raw-assets/";
@@ -30,8 +31,8 @@ export const app = new Application<HTMLCanvasElement>({
 function resize() {
     const windowWidth = window.innerWidth;
     const windowHeight = window.innerHeight;
-    const minWidth = 375;
-    const minHeight = 700;
+    const minWidth = 1024;
+    const minHeight = 720;
 
     // Calculate renderer and canvas sizes based on current dimensions
     const scaleX = windowWidth < minWidth ? minWidth / windowWidth : 1;
@@ -47,6 +48,9 @@ function resize() {
 
     // Update renderer  and navigation screens dimensions
     app.renderer.resize(width, height);
+
+    MIDDLE.x = window.screen.width/2;
+    MIDDLE.y = window.screen.height/2;
 }
 
 window.onload = async (): Promise<void> => {
@@ -64,12 +68,12 @@ window.onload = async (): Promise<void> => {
         const path = ASSET_PATH + "chips/" + name + ".png";
         Assets.add(name, path)
     });
-    const uiTextures = ["deal_button"];
-    uiTextures.forEach((name: string) => {
+    BUTTON_NAMES.forEach((name: string) => {
         const path = ASSET_PATH + "ui/" + name + ".png";
         Assets.add(name, path)
     });
-    game.textures = await Assets.load([...chipNames, ...CardImageData, ...uiTextures]);
+    
+    game.textures = await Assets.load([...chipNames, ...CardImageData, ...BUTTON_NAMES]);
 
     resize();
     initializeValues();
