@@ -1,4 +1,4 @@
-import { Container, Sprite, TEXT_GRADIENT, Text } from "pixi.js";
+import { Container, Sprite, Text } from "pixi.js";
 import { Game, Vector2, GameState } from "../util/HelperTypes";
 import {
     CHIP_DIMENSIONS,

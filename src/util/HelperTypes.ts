@@ -1,4 +1,4 @@
-import { Application, Container, Sprite, Text } from "pixi.js"
+import { Application, Container, Text } from "pixi.js"
 import { Card } from "../logic/Cards";
 import { WagerState } from "../states/Wager";
 import { PlayState } from "../states/Play";
@@ -18,9 +18,13 @@ export class Game {
 export class GameState {
     balanceText!: Text;
     wagerText!: Text;
-    container!: Container;    
+    container!: Container;
+    game!: Game;
     public start() {}
-    public new(newState: GameState) {}
+    public new(newState: GameState) {
+        this.game.state = newState;
+        this.game.state.start();
+    }
 }
 
 export type Vector2 = {

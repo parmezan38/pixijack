@@ -8,12 +8,12 @@ import {
 import { Chips } from "./logic/Chips";
 
 import { WagerState } from "./states/Wager";
-import { Game, GameState, Vector2 } from "./util/HelperTypes";
+import { Game, GameState } from "./util/HelperTypes";
 import { PlayState } from "./states/Play";
 import { BUTTON_NAMES, MIDDLE, WINDOW_SIZE } from "./visual/UI";
 
 const BALANCE = 1000;
-const ASSET_PATH = "../../raw-assets/";
+const ASSET_PATH = "../../";
 
 let game: Game = new Game();
 game.balance = BALANCE;

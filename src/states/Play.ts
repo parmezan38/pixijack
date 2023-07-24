@@ -2,7 +2,7 @@ import { Container, Sprite, Text } from "pixi.js";
 import { Game, GameState, Vector2 } from "../util/HelperTypes";
 import { CARD_SCALE, CARD_DIMENSIONS, Card, createShuffledDeck, removeCardFromShuffledDeck, CARD_DISTANCE, CARD_TYPES } from "../logic/Cards";
 import { animateSprite, revealSprite } from "../visual/AnimationTools";
-import { MIDDLE, TEXT_MEDIUM, TEXT_SMALL } from "../visual/UI";
+import { MIDDLE, TEXT_MEDIUM } from "../visual/UI";
 
 type HandCard = {
     card: Card;
