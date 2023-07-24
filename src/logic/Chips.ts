@@ -1,4 +1,4 @@
-import { Sprite } from "pixi.js"
+import { Sprite, Text } from "pixi.js"
 import { Vector2 } from "../util/HelperTypes";
 
 export const CHIP_SCALE: number = 0.4;
@@ -23,53 +23,56 @@ export const Chips: Chip[] = [
 export type ChipSlot = {
     name: string,
     count: number,
-    sprite?: Sprite
+    sprite?: Sprite,
+    text?: Text
 }
 
 export let WageredChips: ChipSlot[] = [];
 
-function createSlot(chip: Chip) {
+function createSlot(chip: Chip): number {
     const slot: ChipSlot = {
         name: chip.name,
         count: 1
     }
-    WageredChips.push(slot);
+    return WageredChips.push(slot)-1;
 }
 
-export const addChipToWageredSlot = (chip: Chip) => {
+export const addChipToWageredSlot = (chip: Chip): number => {
     if (WageredChips.length === 0) {
-        createSlot(chip);
-        return 0;
+        return createSlot(chip);
     } 
     
     const i = WageredChips.findIndex((slot: ChipSlot) => slot.name === chip.name);
     if (i >= 0) {
         WageredChips[i].count++;
         return i;
+    } else {
+        return createSlot(chip);
     }
-    createSlot(chip);
-    return WageredChips.length-1;
 };
 
-export const removeChipFromWageredSlot = (chip: Chip) => {
-    if (WageredChips.length <= 0) return false;
+export const removeChipFromWageredSlot = (chip: Chip): number => {
+    if (WageredChips.length <= 0) return -1;
 
     const i = WageredChips.findIndex((slot: ChipSlot) => slot.name === chip.name);
     if (i >= 0) {
         if (WageredChips[i].count > 1) {
             WageredChips[i].count--;
-            return false
+            return i;
         } else {
             WageredChips[i].sprite!.destroy();
+            WageredChips[i].text!.destroy();
             WageredChips.splice(i, 1);
-            return true;
+            return i;
         }
     }
+    return i;
 };
 
 export const resetWageredChips = () => {
     for(let i=0; i<WageredChips.length; i++) {
-        WageredChips[i].sprite?.destroy()
+        WageredChips[i].sprite?.destroy();
+        WageredChips[i].text?.destroy();
     }
     WageredChips = [];
 }

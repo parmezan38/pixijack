@@ -20,6 +20,8 @@ game.balance = BALANCE;
 game.wager = 0;
 game.deck = []
 game.state = new GameState();
+game.buttonContainer = new Container();
+
 const width = 1440;
 const height = 1080;
 
@@ -74,27 +76,46 @@ window.onload = async (): Promise<void> => {
         ...chipNames,
         ...CardImageData,
         ...BUTTON_NAMES,
-        "back_card"
+        "back_card",
     ]);
 
     resize();
-    initializeValues();
-
+    
     game.wagerState = new WagerState(game);
     game.playState = new PlayState(game);
+    initializeValues();
+    
+    game.app.stage.addChild(game.buttonContainer);
+    addResetButton();
 
     game.state = game.wagerState;
     game.state.start();
 
-    const cont = new Container();
-    game.app.stage.addChild(cont);
 };
 
 function initializeValues() {
     game.balance = BALANCE;
+    game.wager = 0;
 }
 
 function createAsset(name: string, folder: string) {
     const path = `${ASSET_PATH}${folder}/${name}.png`;
     Assets.add(name, path);
+}
+
+function reset() {
+    initializeValues();
+    game.state.new(game.wagerState);
+}
+
+function addResetButton() {
+    const dealButton = Sprite.from(game.textures["reset_button"]);
+    dealButton.anchor.set(0.0);
+    dealButton.scale.x = 0.6;
+    dealButton.scale.y = 0.6;
+    dealButton.x = 10;
+    dealButton.y = 10;
+    dealButton.interactive = true;
+    dealButton.onclick = () => {reset()}
+    game.buttonContainer.addChild(dealButton);
 }

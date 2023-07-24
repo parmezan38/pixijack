@@ -1,19 +1,21 @@
-import { Container, Sprite, Text } from "pixi.js";
+import { Container, Sprite, TEXT_GRADIENT, Text } from "pixi.js";
 import { Game, Vector2, GameState } from "../util/HelperTypes";
 import {
     CHIP_DIMENSIONS,
     CHIP_SCALE,
     Chip,
+    ChipSlot,
     Chips,
     WageredChips,
     addChipToWageredSlot,
     removeChipFromWageredSlot,
     resetWageredChips
 } from "../logic/Chips";
-import { MIDDLE, WINDOW_SIZE } from "../visual/UI";
+import { MIDDLE, TEXT_SMALL, WINDOW_SIZE } from "../visual/UI";
 
 export class WagerState extends GameState {
     game: Game = new Game();
+    selectableChips: Sprite[] = [];
 
     constructor(_game: Game) {
         super();
@@ -33,6 +35,7 @@ export class WagerState extends GameState {
         this.createSelectableChips(startPos);
         this.addDealButton();
         this.addText();
+        this.game.buttonContainer.visible = true;
     }
 
     private initializeValues() {
@@ -51,61 +54,92 @@ export class WagerState extends GameState {
             selectChip.x = startPos.x + (i+1)*CHIP_DIMENSIONS.x*1.2;
             selectChip.y = startPos.y;
             selectChip.interactive = true;
-            selectChip.onclick = () => {this.wagerChip(Chips[i])}
-            this.selectableChips!.push(selectChip);
+            selectChip.onclick = () => {this.wagerChip(Chips[i], selectChip)}
+            this.selectableChips.push(selectChip);
             this.container.addChild(selectChip);
         }
     }
     
-    private createWageredChip(chip: Chip, startPos: Vector2, i: number) {
+    private createWageredChipSprite(chip: Chip, position: Vector2, i: number) {
         const wageredChip = Sprite.from(this.game.textures[chip.name]);
         wageredChip.anchor.set(0.5);
         wageredChip.scale.x = CHIP_SCALE;
         wageredChip.scale.y = CHIP_SCALE;
-        wageredChip.x = startPos.x + (i+1)*CHIP_DIMENSIONS.x*1.2;
-        wageredChip.y = startPos.y;
+        wageredChip.x = position.x;
+        wageredChip.y = position.y;
         wageredChip.interactive = true;
         wageredChip.onclick = () => {this.removeChip(chip)}
         WageredChips[i].sprite = wageredChip;
         this.container.addChild(wageredChip);
     }
+
+    private createWageredChipText(slot: ChipSlot, position: Vector2, i: number) {
+        const text = new Text(`x${slot.count}`);
+        text.x = position.x + CHIP_DIMENSIONS.x*0.1;
+        text.y = position.y + CHIP_DIMENSIONS.y*0.1;
+        text.style.fontSize = TEXT_SMALL.fontSize;
+        text.style.fill = TEXT_SMALL.fill;
+        text.style.strokeThickness = TEXT_SMALL.strokeThickness;
+        text.style.stroke = TEXT_SMALL.stroke;
+        WageredChips[i].text = text;
+        this.container.addChild(text);
+    }
     
-    private wagerChip(chip: Chip) {
-        const slot = addChipToWageredSlot(chip);
+    private wagerChip(chip: Chip, sprite: Sprite) {
+        const i = addChipToWageredSlot(chip);
         this.game.balance -= chip.value;
         this.game.wager += chip.value;
         this.updateText();
-        if (WageredChips[slot].count <= 1) {
-            const startPos: Vector2 = {
-                x: MIDDLE.x - 3*CHIP_DIMENSIONS.x-CHIP_DIMENSIONS.x/2,
-                y: WINDOW_SIZE.y - 2*CHIP_DIMENSIONS.y
+        this.updateChipCounter(WageredChips[i]);
+        if (WageredChips[i].count <= 1) {
+            const position: Vector2 = {
+                x: sprite.position.x,
+                y: sprite.position.y-CHIP_DIMENSIONS.y*1.1
             }
-            this.createWageredChip(chip, startPos, slot);
+            this.createWageredChipSprite(chip, position, i);
+            this.createWageredChipText(WageredChips[i], position, i);
         }
     }
     
     private removeChip(chip: Chip) {
-        removeChipFromWageredSlot(chip);
+        const i = removeChipFromWageredSlot(chip);
         this.game.balance += chip.value;
         this.game.wager -= chip.value;
         this.updateText();
+        if (i>=0) {
+            this.updateChipCounter(WageredChips[i]);
+        }
     }
     
     private addText() {
         this.balanceText = new Text(`Player balance: ${this.game.balance}`);
         this.balanceText.x = 50;
         this.balanceText.y = 100;
+        this.balanceText.style.fontSize = TEXT_SMALL.fontSize;
+        this.balanceText.style.fill = TEXT_SMALL.fill;
+        this.balanceText.style.strokeThickness = TEXT_SMALL.strokeThickness;
+        this.balanceText.style.stroke = TEXT_SMALL.stroke;
         this.container.addChild(this.balanceText);
         
         this.wagerText = new Text(`Wager: ${this.game.wager}`);
         this.wagerText.x = 50;
         this.wagerText.y = 150;
+        this.wagerText.style.fontSize = TEXT_SMALL.fontSize;
+        this.wagerText.style.fill = TEXT_SMALL.fill;
+        this.wagerText.style.strokeThickness = TEXT_SMALL.strokeThickness;
+        this.wagerText.style.stroke = TEXT_SMALL.stroke;
         this.container.addChild(this.wagerText);
     }
     
     private updateText() {
         this.balanceText.text = `Player balance: ${this.game.balance}`;
         this.wagerText.text = `Wager: ${this.game.wager}`; 
+    }
+
+    private updateChipCounter(slot: ChipSlot) {
+        if (slot?.text) {
+            slot.text.text = `x${slot.count}`;
+        }
     }
     
     private addDealButton() {

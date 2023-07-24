@@ -12,14 +12,13 @@ export class Game {
     state!: GameState;
     wagerState!: WagerState;
     playState!: PlayState;
+    buttonContainer!: Container;
 }
 
 export class GameState {
     balanceText!: Text;
     wagerText!: Text;
-    selectableChips?: Sprite[];
-    container!: Container;
-    
+    container!: Container;    
     public start() {}
     public new(newState: GameState) {}
 }

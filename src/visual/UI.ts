@@ -13,5 +13,27 @@ export const MIDDLE: Vector2 = {
 export const BUTTON_NAMES = [
     "deal_button",
     "hit_button",
-    "stand_button"
+    "stand_button",
+    "reset_button"
 ];
+
+export const TEXT_BIG = {
+    fontSize: 96,
+    fill: "#fffcf5",
+    strokeThickness: 8,
+    stroke: "#0f0700", 
+}
+
+export const TEXT_MEDIUM = {
+    fontSize: 44,
+    fill: "#fffcf5",
+    strokeThickness: 4,
+    stroke: "#0f0700", 
+}
+
+export const TEXT_SMALL = {
+    fontSize: 34,
+    fill: "#fffcf5",
+    strokeThickness: 4,
+    stroke: "#0f0700", 
+}

@@ -2,7 +2,7 @@ import { Container, Sprite, Text } from "pixi.js";
 import { Game, GameState, Vector2 } from "../util/HelperTypes";
 import { CARD_SCALE, CARD_DIMENSIONS, Card, createShuffledDeck, removeCardFromShuffledDeck, CARD_DISTANCE, CARD_TYPES } from "../logic/Cards";
 import { animateSprite, revealSprite } from "../visual/AnimationTools";
-import { MIDDLE } from "../visual/UI";
+import { MIDDLE, TEXT_MEDIUM, TEXT_SMALL } from "../visual/UI";
 
 type HandCard = {
     card: Card;
@@ -43,7 +43,6 @@ export class PlayState extends GameState {
         this.playerHand = [];
         this.dealerHand = [];
 
-        this.selectableChips = [];
         this.balanceText = new Text("");
         this.wagerText = new Text("");
 
@@ -60,6 +59,7 @@ export class PlayState extends GameState {
     }
 
     private async dealFirst() {
+        this.game.buttonContainer.visible = false;
         // Player Hand
         const playerPos = { 
             x: MIDDLE.x - CARD_DIMENSIONS.x*0.2,
@@ -83,6 +83,8 @@ export class PlayState extends GameState {
 
         this.createButtons();
         this.addPlayerText();
+        this.addDealerText();
+        
         await this.checkCardStatus();
     }
     
@@ -153,13 +155,13 @@ export class PlayState extends GameState {
     private async standCheck() {
         this.disableButtons();
         this.calculateSum();
-        this.addDealerText();
-
+        this.dealerSumText.visible = true;
+        
         if (this.playerSum > 21) {
             await this.endRound(END_TYPE.LOSE);
         } else if (this.playerSum === 21) {
             if (this.dealerSum > 21) {
-                this.endRound(END_TYPE.WIN);
+                await this.endRound(END_TYPE.WIN);
             } else if (this.dealerSum < 21) {
                 await this.dealDealerAnotherHand();
                 await this.standCheck();
@@ -224,7 +226,7 @@ export class PlayState extends GameState {
         this.game.wager = 0;
         await this.showEndRoundTitle(type);
         this.new(this.game.wagerState);
-        return;
+        return
     }
 
     private async showEndRoundTitle(type: END_TYPE) {
@@ -273,10 +275,10 @@ export class PlayState extends GameState {
     
     private addPlayerText() {
         this.playerSumText = new Text(`${this.playerSum}`);
-        this.playerSumText.style.fontSize = 38;
-        this.playerSumText.style.fill = "#fffcf5";
-        this.playerSumText.style.strokeThickness = 4;
-        this.playerSumText.style.stroke = "#0f0700";
+        this.playerSumText.style.fontSize = TEXT_MEDIUM.fontSize;
+        this.playerSumText.style.fill = TEXT_MEDIUM.fill;
+        this.playerSumText.style.strokeThickness = TEXT_MEDIUM.strokeThickness;
+        this.playerSumText.style.stroke = TEXT_MEDIUM.stroke;
         this.playerSumText.anchor.x = 0.5;
         this.playerSumText.anchor.y = 0.5;
         this.playerSumText.x = MIDDLE.x;
@@ -285,14 +287,15 @@ export class PlayState extends GameState {
     }
     private addDealerText() {
         this.dealerSumText = new Text(`${this.dealerSum}`);
-        this.playerSumText.style.fontSize = 38;
-        this.dealerSumText.style.fill = "#fffcf5";
-        this.dealerSumText.style.strokeThickness = 4;
-        this.dealerSumText.style.stroke = "#0f0700";
+        this.dealerSumText.style.fontSize = TEXT_MEDIUM.fontSize;
+        this.dealerSumText.style.fill = TEXT_MEDIUM.fill;
+        this.dealerSumText.style.strokeThickness = TEXT_MEDIUM.strokeThickness;
+        this.dealerSumText.style.stroke = TEXT_MEDIUM.stroke;
         this.dealerSumText.anchor.x = 0.5;
         this.dealerSumText.anchor.y = 0.5;
         this.dealerSumText.x = MIDDLE.x;
         this.dealerSumText.y = 50;
+        this.dealerSumText.visible = false;
         this.container.addChild(this.dealerSumText);
     }
 
@@ -307,6 +310,8 @@ export class PlayState extends GameState {
         
         const standPos: Vector2 = { x: MIDDLE.x + 100, y: MIDDLE.y };
         this.createButtonSprite("stand_button", standPos);
+        
+        this.game.buttonContainer.visible = true;
     }
 
     private createButtonSprite(name: string, pos: Vector2) {
@@ -334,11 +339,13 @@ export class PlayState extends GameState {
     
     private disableButtons() {
         this.buttonContainer.removeChildren();
+        this.game.buttonContainer.visible = false;
     }
 
     public destroy() {
         this.disableButtons();
-        this.container.removeAllListeners();
         this.container.removeChildren();
+        this.container.removeAllListeners();
+        return;
     }
 }
