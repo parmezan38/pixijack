@@ -37,35 +37,36 @@ export const revealSprite = (container: Container, back: Sprite, card: Card): Pr
         container.addChild(front);
 
         const duration = 0.4;
-        const phaseFour = () => {
+        const scale2 = () => {
             back.visible = false;
             front.visible = true;
             gsap.to(front.scale, {
                 x: scaleX,
                 duration,
-                onComplete: resolve,
+                onComplete: phaseTwo,
             });
         };
-        const phaseThree = () => {
+        const scale1 = () => {
+            front.x = back.x;
+            front.y = back.y;
             gsap.to(back.scale, {
                 x: 0,
                 duration,
-                onComplete: phaseFour,
+                onComplete: scale2,
             });
         };
         const phaseTwo = () => {
-            back.zIndex += 1;
-            front.zIndex += 1;
-            gsap.to(back.position, {
+            front.zIndex -= 1;
+            gsap.to(front.position, {
                 x: positionX,
                 duration,
-                onComplete: phaseThree,
+                onComplete: resolve,
             });
         };
         gsap.to(back, {
             x: back.position.x - CARD_DIMENSIONS.x,
             duration,
-            onComplete: phaseTwo,
+            onComplete: scale1,
         });
     });
 }

@@ -1,4 +1,4 @@
-import { Application, Assets } from "pixi.js";
+import { Application, Assets, Container, Sprite } from "pixi.js";
 
 import {
     createDeck,
@@ -8,9 +8,9 @@ import {
 import { Chips } from "./logic/Chips";
 
 import { WagerState } from "./states/Wager";
-import { Game, GameState } from "./util/HelperTypes";
+import { Game, GameState, Vector2 } from "./util/HelperTypes";
 import { PlayState } from "./states/Play";
-import { BUTTON_NAMES, MIDDLE } from "./visual/UI";
+import { BUTTON_NAMES, MIDDLE, WINDOW_SIZE } from "./visual/UI";
 
 const BALANCE = 1000;
 const ASSET_PATH = "../../raw-assets/";
@@ -20,36 +20,39 @@ game.balance = BALANCE;
 game.wager = 0;
 game.deck = []
 game.state = new GameState();
+const width = 1440;
+const height = 1080;
+
 
 export const app = new Application<HTMLCanvasElement>({
-    resolution: Math.max(window.devicePixelRatio, 2),
+    width, height,
     backgroundColor: "#3a8576",
 });
 
-/** Set up a resize function for the app */
 function resize() {
-    const windowWidth = window.innerWidth;
-    const windowHeight = window.innerHeight;
-    const minWidth = 1024;
-    const minHeight = 720;
+    const screenWidth = Math.max(document.documentElement.clientWidth, window.innerWidth || 0);
+    const screenHeight = Math.max(document.documentElement.clientHeight, window.innerHeight || 0);
 
-    // Calculate renderer and canvas sizes based on current dimensions
-    const scaleX = windowWidth < minWidth ? minWidth / windowWidth : 1;
-    const scaleY = windowHeight < minHeight ? minHeight / windowHeight : 1;
-    const scale = scaleX > scaleY ? scaleX : scaleY;
-    const width = windowWidth * scale;
-    const height = windowHeight * scale;
+    const scale = Math.min(screenWidth / width, screenHeight / height);
 
-    // Update canvas style dimensions and scroll window up to avoid issues on mobile resize
-    app.renderer.view.style.width = `${windowWidth}px`;
-    app.renderer.view.style.height = `${windowHeight}px`;
-    window.scrollTo(0, 0);
+    const enlargedWidth = Math.floor(scale * width);
+    const enlargedHeight = Math.floor(scale * height);
 
-    // Update renderer  and navigation screens dimensions
-    app.renderer.resize(width, height);
+    const horizontalMargin = (screenWidth - enlargedWidth) / 2;
+    const verticalMargin = (screenHeight - enlargedHeight) / 2;
 
-    MIDDLE.x = window.screen.width/2;
-    MIDDLE.y = window.screen.height/2;
+    app.view.style.width = `${enlargedWidth}px`;
+    app.view.style.height = `${enlargedHeight}px`;
+    app.view.style.marginLeft = app.view.style.marginRight = `${horizontalMargin}px`;
+    app.view.style.marginTop = app.view.style.marginBottom = `${verticalMargin}px`;
+
+    let appWidth = app.renderer.width;
+    let appHeight = app.renderer.height;
+
+    MIDDLE.x = appWidth/2;
+    MIDDLE.y = appHeight/2;
+    WINDOW_SIZE.x = appWidth;
+    WINDOW_SIZE.y = appHeight;
 }
 
 window.onload = async (): Promise<void> => {
@@ -76,12 +79,15 @@ window.onload = async (): Promise<void> => {
 
     resize();
     initializeValues();
-    
+
     game.wagerState = new WagerState(game);
     game.playState = new PlayState(game);
 
     game.state = game.wagerState;
     game.state.start();
+
+    const cont = new Container();
+    game.app.stage.addChild(cont);
 };
 
 function initializeValues() {

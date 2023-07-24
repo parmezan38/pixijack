@@ -10,7 +10,7 @@ import {
     removeChipFromWageredSlot,
     resetWageredChips
 } from "../logic/Chips";
-import { MIDDLE } from "../visual/UI";
+import { MIDDLE, WINDOW_SIZE } from "../visual/UI";
 
 export class WagerState extends GameState {
     game: Game = new Game();
@@ -21,8 +21,6 @@ export class WagerState extends GameState {
     }
     
     public start() {
-        console.log("WagerState");
-
         this.container = new Container();
         this.game.app.stage.addChild(this.container);
 
@@ -30,7 +28,7 @@ export class WagerState extends GameState {
 
         const startPos: Vector2 = {
             x: MIDDLE.x - 3*CHIP_DIMENSIONS.x-CHIP_DIMENSIONS.x/2,
-            y: 600 
+            y: WINDOW_SIZE.y - (CHIP_DIMENSIONS.y)
         }
         this.createSelectableChips(startPos);
         this.addDealButton();
@@ -80,7 +78,7 @@ export class WagerState extends GameState {
         if (WageredChips[slot].count <= 1) {
             const startPos: Vector2 = {
                 x: MIDDLE.x - 3*CHIP_DIMENSIONS.x-CHIP_DIMENSIONS.x/2,
-                y: 480 
+                y: WINDOW_SIZE.y - 2*CHIP_DIMENSIONS.y
             }
             this.createWageredChip(chip, startPos, slot);
         }

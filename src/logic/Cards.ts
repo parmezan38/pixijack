@@ -1,5 +1,4 @@
 import { Vector2 } from "../util/HelperTypes";
-import { MIDDLE } from "../visual/UI";
 
 // Define cards
 export enum CARD_TYPES {
@@ -27,16 +26,12 @@ export type Card = {
 };
 export type Cards = Card[];
 
-export const CARD_SCALE: number = 0.3;
+export const CARD_SCALE: number = 0.5;
 export const CARD_DIMENSIONS: Vector2 = {
     x: 500 * CARD_SCALE,
     y: 726 * CARD_SCALE
 }
 export const CARD_DISTANCE: number = CARD_DIMENSIONS.x * 0.4;
-export const CARD_POSITIONS: Vector2[] = [
-    { x: MIDDLE.x - CARD_DIMENSIONS.x*0.2, y: MIDDLE.y + 180 }, // Player 
-    { x: MIDDLE.x - CARD_DIMENSIONS.x*0.2, y: MIDDLE.y - 180 } // Dealer
-]
 
 const Deck: Card[] = [];
 
