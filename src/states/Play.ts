@@ -39,8 +39,6 @@ export class PlayState extends GameState {
     }
     
     public start() {
-        console.log("PlayState");
-
         this.playerHand = [];
         this.dealerHand = [];
 
@@ -64,34 +62,14 @@ export class PlayState extends GameState {
         // Player Hand
         const card1 = removeCardFromShuffledDeck(this.deck);
         const card2 = removeCardFromShuffledDeck(this.deck);
-        this.playerHand.push({
-            card: card1!,
-            sprite: this.createCardSprite(card1!),
-            delay: 0.0,
-            position: CARD_POSITIONS[0]
-        });
-        this.playerHand.push({
-            card: card2!,
-            sprite: this.createCardSprite(card2!),
-            delay: 0.3,
-            position: this.getPositionFromPrevious(true)
-        });
+        this.addCardToHand(card1!, 0.0, true, CARD_POSITIONS[0]);
+        this.addCardToHand(card2!, 0.3, true);
 
         // Dealer Hand
         const card3 = removeCardFromShuffledDeck(this.deck);
         const card4 = removeCardFromShuffledDeck(this.deck);
-        this.dealerHand.push({
-            card: card3!,
-            sprite: this.createCardSprite(card3!, true),
-            delay: 0.6,
-            position: CARD_POSITIONS[1]
-        });
-        this.dealerHand.push({
-            card: card4!,
-            sprite: this.createCardSprite(card4!),
-            delay: 0.9,
-            position: this.getPositionFromPrevious(false)
-        });
+        this.addCardToHand(card3!, 0.6, false, CARD_POSITIONS[1]);
+        this.addCardToHand(card4!, 0.9, false);
 
         await this.animateCards([...this.playerHand, ...this.dealerHand]);
 
@@ -101,6 +79,20 @@ export class PlayState extends GameState {
     }
     
     private checkCardStatus() {
+        this.calculateSum();
+
+        if (this.playerSum === 21) {
+            if(this.dealerSum !== 21) {
+                this.endRound(END_TYPE.WIN);
+            } else {
+                this.endRound(END_TYPE.DRAW);
+            }
+        } else if (this.playerSum > 21) {
+            this.endRound(END_TYPE.LOSE);
+        }
+    }
+
+    private calculateSum(){
         this.playerSum = 0;
         this.dealerSum = 0;
 
@@ -115,16 +107,6 @@ export class PlayState extends GameState {
         this.playerSum = this.checkIfAce(true);
         this.dealerSum = this.checkIfAce(false);
         this.updateText();
-
-        if (this.playerSum === 21) {
-            if(this.dealerSum !== 21) {
-                this.endRound(END_TYPE.WIN);
-            } else {
-                this.endRound(END_TYPE.DRAW);
-            }
-        } else if (this.playerSum > 21) {
-            this.endRound(END_TYPE.LOSE);
-        }
     }
 
     private checkIfAce(isPlayer: Boolean) {
@@ -144,39 +126,11 @@ export class PlayState extends GameState {
         return sum;
     }
 
-    private addPlayerText() {
-        this.playerSumText = new Text(`${this.playerSum}`);
-        this.playerSumText.anchor.x = 0.5;
-        this.playerSumText.anchor.y = 0.5;
-        this.playerSumText.x = MIDDLE.x;
-        this.playerSumText.y = MIDDLE.y;
-        this.container.addChild(this.playerSumText);
-    }
-    private addDealerText() {
-        this.dealerSumText = new Text(`${this.dealerSum}`);
-        this.dealerSumText.anchor.x = 0.5;
-        this.dealerSumText.anchor.y = 0.5;
-        this.dealerSumText.x = MIDDLE.x;
-        this.dealerSumText.y = 50;
-        this.container.addChild(this.dealerSumText);
-    }
-
-    private updateText() {
-        this.playerSumText.text = `${this.playerSum}`;
-        this.dealerSumText.text = `${this.dealerSum}`;
-    }
-
     private async hit() {
         this.disableButtons();
 
         const card = removeCardFromShuffledDeck(this.deck);
-
-        this.playerHand.push({
-            card: card!,
-            sprite: this.createCardSprite(card!),
-            delay: 0.0,
-            position: this.getPositionFromPrevious(true)
-        });
+        this.addCardToHand(card!, 0.0, true);
         
         const hand = this.playerHand[this.playerHand.length-1];
 
@@ -189,9 +143,50 @@ export class PlayState extends GameState {
     private async stand() {
         this.disableButtons();
         await this.revealCard();
-        this.checkCardStatus();
+        await this.standCheck();
+    }
+
+    private async standCheck() {
+        this.calculateSum();
         this.addDealerText();
-        this.createButtons();
+
+        if (this.playerSum > 21) {
+            this.endRound(END_TYPE.LOSE);
+        } else if (this.playerSum === 21) {
+            if (this.dealerSum > 21) {
+                this.endRound(END_TYPE.WIN);
+            } else if (this.dealerSum < 21) {
+                await this.dealDealerAnotherHand();
+                await this.standCheck();
+            } else {
+                this.endRound(END_TYPE.DRAW);
+            }
+        } else {
+            if (this.dealerSum > 21) {
+                this.endRound(END_TYPE.WIN);
+            } else if (this.dealerSum > this.playerSum){
+                this.endRound(END_TYPE.LOSE);
+            } 
+            else if (this.dealerSum < this.playerSum) {
+                await this.dealDealerAnotherHand();
+                await this.standCheck();
+            } else {
+                this.endRound(END_TYPE.DRAW);
+            }
+        }
+    }
+
+    private async dealDealerAnotherHand() {
+        const card = removeCardFromShuffledDeck(this.deck);
+        this.addCardToHand(card!, 0.0, false);
+        const hand = this.dealerHand[this.dealerHand.length-1];
+        await this.animateCards([hand]);
+    }
+    private addCardToHand(card: Card, delay: number, isPlayer: boolean, _position: Vector2|null = null) {
+        const hand = isPlayer ? this.playerHand : this.dealerHand;
+        const position = _position != null ? _position : this.getPositionFromPrevious(isPlayer);
+        const sprite = this.createCardSprite(card);
+        hand.push({ card, delay, sprite, position }); 
     }
 
     private endRound(type: END_TYPE) {
@@ -206,21 +201,13 @@ export class PlayState extends GameState {
     }
 
     private getPositionFromPrevious(isPlayer: Boolean) {
-        if (isPlayer) {
-            const previousHand = this.playerHand[this.playerHand.length-1]
-            const pos = {
-                x: previousHand.position.x + CARD_DISTANCE,
-                y: previousHand.position.y
-            }
-            return pos;
-        } else {
-            const previousHand = this.dealerHand[this.dealerHand.length-1]
-            const pos = {
-                x: previousHand.position.x + CARD_DISTANCE,
-                y: previousHand.position.y
-            }
-            return pos;
+        const hand = isPlayer ? this.playerHand : this.dealerHand;
+        const previousHand = hand[hand.length-1]
+        const pos = {
+            x: previousHand.position.x + CARD_DISTANCE,
+            y: previousHand.position.y
         }
+        return pos;
     }
 
     private async animateCards(hands: HandCard[]) {
@@ -253,6 +240,28 @@ export class PlayState extends GameState {
         card.rotation = (rand < 0.5 ? rand*-1: rand*1)*0.02;
         this.cardContainer.addChild(card);
         return card;
+    }
+
+    private addPlayerText() {
+        this.playerSumText = new Text(`${this.playerSum}`);
+        this.playerSumText.anchor.x = 0.5;
+        this.playerSumText.anchor.y = 0.5;
+        this.playerSumText.x = MIDDLE.x;
+        this.playerSumText.y = MIDDLE.y;
+        this.container.addChild(this.playerSumText);
+    }
+    private addDealerText() {
+        this.dealerSumText = new Text(`${this.dealerSum}`);
+        this.dealerSumText.anchor.x = 0.5;
+        this.dealerSumText.anchor.y = 0.5;
+        this.dealerSumText.x = MIDDLE.x;
+        this.dealerSumText.y = 50;
+        this.container.addChild(this.dealerSumText);
+    }
+
+    private updateText() {
+        this.playerSumText.text = `${this.playerSum}`;
+        this.dealerSumText.text = `${this.dealerSum}`;
     }
 
     private createButtons() {
