@@ -1,4 +1,5 @@
 # Pixijack
+A blackjack-like game made with PixiJS
 
 # Prerequisites
 To run this project, you need to have `Node.js` and `npm` installed on your system.
@@ -15,10 +16,11 @@ npm run start
 # Building the game
 ```sh
 # Compile the game into a bundle, which can be found in `dist/`
-npm run build`
+npm run build
 ```
 
 # Running tests
 ```sh
+# Test are made with Jest
 npm test
 ```
