@@ -144,8 +144,6 @@ export class WagerState extends GameState {
         const dealButton = Sprite.from(this.game.textures.deal_button);
 
         dealButton.anchor.set(0.5);
-        dealButton.scale.x = 1;
-        dealButton.scale.y = 1;
         dealButton.x = MIDDLE.x;
         dealButton.y = MIDDLE.y;
         dealButton.interactive = true;

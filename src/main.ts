@@ -1,4 +1,4 @@
-import { Application, Assets, Container, Sprite, Text } from 'pixi.js';
+import { Application, Assets, Container, Sprite, Text, TilingSprite } from 'pixi.js';
 
 import {
     CardImageData,
@@ -7,7 +7,7 @@ import { Chips } from './logic/Chips';
 import { PlayState } from './states/Play';
 import { WagerState } from './states/Wager';
 import { Game, GameState } from './util/ClassesAndTypes';
-import { BUTTON_NAMES, MIDDLE, TEXT_SMALL, WINDOW_SIZE } from './visual/UI';
+import { BACKGROUND_NAMES, BUTTON_NAMES, MIDDLE, TEXT_BIG, TEXT_SMALL, WINDOW_SIZE } from './visual/UI';
 
 const BALANCE = 1000;
 const ASSET_PATH = '../../';
@@ -29,7 +29,6 @@ game.updateText = () => {
 
 const width = 1440;
 const height = 1080;
-
 
 export const app = new Application<HTMLCanvasElement>({
     width, height,
@@ -66,6 +65,10 @@ window.onload = async (): Promise<void> => {
     document.body.appendChild(app.view);
     game.app = app;
     window.addEventListener('resize', resize);
+
+    const loadingContainer = new Container();
+    loadingContainer.addChild(addLoadingText());
+    game.app.stage.addChild(loadingContainer);
     
     createDeck();
     CardImageData.forEach((name: string) => createAsset(name, 'cards'));
@@ -76,18 +79,22 @@ window.onload = async (): Promise<void> => {
     
     BUTTON_NAMES.forEach((name: string) => createAsset(name, 'ui'));
 
+    BACKGROUND_NAMES.forEach((name: string) => createAsset(name, 'background'));
+
     createAsset('back_card', 'cards');
-    createAsset('background_edge', 'background');
 
     game.textures = await Assets.load([
         ...chipNames,
         ...CardImageData,
         ...BUTTON_NAMES,
+        ...BACKGROUND_NAMES,
         'back_card',
-        'background_edge',
     ]);
 
     resize();
+
+    loadingContainer.destroy();
+
     game.app.stage.addChild(game.backgroundContainer);
     createBackgroundAssets();
     
@@ -135,9 +142,21 @@ function addResetButton() {
 }
 
 function createBackgroundAssets() {
-    const edge = Sprite.from(game.textures.background_edge);
+    const tile = new TilingSprite(
+        game.textures.background_tile,
+        WINDOW_SIZE.x,
+        WINDOW_SIZE.y,
+    );
+    game.backgroundContainer.addChild(tile);
 
+    const edge = Sprite.from(game.textures.background_edge);
     game.backgroundContainer.addChild(edge);
+
+    const logo = Sprite.from(game.textures.background_logo);
+    logo.anchor.set(0.5);
+    logo.x = MIDDLE.x;
+    logo.y = MIDDLE.y;
+    game.backgroundContainer.addChild(logo);
 }
 
 function addText() {
@@ -159,3 +178,19 @@ function addText() {
     game.wagerText.style.stroke = TEXT_SMALL.stroke;
     game.textContainer.addChild(game.wagerText);
 }
+
+function addLoadingText() {
+    const loadingText: Text = new Text('Loading,\nplease wait...');
+
+    loadingText.style.fontSize = TEXT_BIG.fontSize;
+    loadingText.style.fill = TEXT_BIG.fill;
+    loadingText.style.strokeThickness = TEXT_BIG.strokeThickness;
+    loadingText.style.stroke = TEXT_BIG.stroke;
+    loadingText.anchor.x = 0.5;
+    loadingText.anchor.y = 0.5;
+    loadingText.x = MIDDLE.x;
+    loadingText.y = MIDDLE.y;
+    
+    return loadingText;
+}
+

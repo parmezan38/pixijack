@@ -17,6 +17,12 @@ export const BUTTON_NAMES = [
     'reset_button',
 ];
 
+export const BACKGROUND_NAMES = [
+    'background_edge',
+    'background_tile',
+    'background_logo',
+];
+
 export const TEXT_BIG = {
     fontSize: 96,
     fill: '#fffcf5',
