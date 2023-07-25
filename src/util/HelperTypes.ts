@@ -13,7 +13,11 @@ export class Game {
     wagerState!: WagerState;
     playState!: PlayState;
     buttonContainer!: Container;
+    textContainer!: Container;
     backgroundContainer!: Container;
+    balanceText!: Text;
+    wagerText!: Text;
+    updateText = () => {};
 }
 
 export class GameState {

@@ -1,4 +1,4 @@
-import { Application, Assets, Container, Sprite } from "pixi.js";
+import { Application, Assets, Container, Sprite, Text } from "pixi.js";
 
 import {
     createDeck,
@@ -10,7 +10,7 @@ import { Chips } from "./logic/Chips";
 import { WagerState } from "./states/Wager";
 import { Game, GameState } from "./util/HelperTypes";
 import { PlayState } from "./states/Play";
-import { BUTTON_NAMES, MIDDLE, WINDOW_SIZE } from "./visual/UI";
+import { BUTTON_NAMES, MIDDLE, TEXT_SMALL, WINDOW_SIZE } from "./visual/UI";
 
 const BALANCE = 1000;
 const ASSET_PATH = "../../";
@@ -21,7 +21,13 @@ game.wager = 0;
 game.deck = []
 game.state = new GameState();
 game.buttonContainer = new Container();
+game.textContainer = new Container();
 game.backgroundContainer = new Container();
+game.wagerText = new Text(`Wager: ${game.wager}`);
+game.updateText = () => {
+    game.balanceText.text = `Balance: ${game.balance}`;
+    game.wagerText.text = `Wager: ${game.wager}`; 
+}
 
 const width = 1440;
 const height = 1080;
@@ -88,14 +94,16 @@ window.onload = async (): Promise<void> => {
     
     game.wagerState = new WagerState(game);
     game.playState = new PlayState(game);
+    game.app.stage.addChild(game.textContainer);
     initializeValues();
-    
+    addText();
+
     game.app.stage.addChild(game.buttonContainer);
     addResetButton();
 
     game.state = game.wagerState;
     game.state.start();
-
+    game.updateText();
 };
 
 function initializeValues() {
@@ -118,8 +126,8 @@ function addResetButton() {
     dealButton.anchor.set(0.0);
     dealButton.scale.x = 0.6;
     dealButton.scale.y = 0.6;
-    dealButton.x = 10;
-    dealButton.y = 10;
+    dealButton.x = 60;
+    dealButton.y = 60;
     dealButton.interactive = true;
     dealButton.onclick = () => {reset()}
     game.buttonContainer.addChild(dealButton);
@@ -128,4 +136,24 @@ function addResetButton() {
 function createBackgroundAssets() {
     const edge = Sprite.from(game.textures["background_edge"]);
     game.backgroundContainer.addChild(edge);
+}
+
+function addText() {
+    game.balanceText = new Text(`Balance: ${game.balance}`);
+    game.balanceText.x = 60;
+    game.balanceText.y = 130;
+    game.balanceText.style.fontSize = TEXT_SMALL.fontSize;
+    game.balanceText.style.fill = TEXT_SMALL.fill;
+    game.balanceText.style.strokeThickness = TEXT_SMALL.strokeThickness;
+    game.balanceText.style.stroke = TEXT_SMALL.stroke;
+    game.textContainer.addChild(game.balanceText);
+    
+    game.wagerText = new Text(`Wager: ${game.wager}`);
+    game.wagerText.x = 60;
+    game.wagerText.y = 180;
+    game.wagerText.style.fontSize = TEXT_SMALL.fontSize;
+    game.wagerText.style.fill = TEXT_SMALL.fill;
+    game.wagerText.style.strokeThickness = TEXT_SMALL.strokeThickness;
+    game.wagerText.style.stroke = TEXT_SMALL.stroke;
+    game.textContainer.addChild(game.wagerText);
 }

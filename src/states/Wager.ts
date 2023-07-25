@@ -25,6 +25,7 @@ export class WagerState extends GameState {
     }
     
     public async start() {
+        this.game.updateText();
         this.container = new Container();
         this.game.app.stage.addChild(this.container);
         this.game.app.stage.addChild(this.buttonContainer);
@@ -38,7 +39,6 @@ export class WagerState extends GameState {
         }
         await this.createSelectableChips(startPos);
         this.addDealButton();
-        this.addText();
         this.game.buttonContainer.visible = true;
     }
 
@@ -100,7 +100,7 @@ export class WagerState extends GameState {
         const i = addChipToWageredSlot(chip);
         this.game.balance -= chip.value;
         this.game.wager += chip.value;
-        this.updateText();
+        this.game.updateText();
         this.updateChipCounter(WageredChips[i]);
         if (WageredChips[i].count <= 1) {
             const position: Vector2 = {
@@ -116,36 +116,12 @@ export class WagerState extends GameState {
         const i = removeChipFromWageredSlot(chip);
         this.game.balance += chip.value;
         this.game.wager -= chip.value;
-        this.updateText();
+        this.game.updateText();
         if (i>=0) {
             this.updateChipCounter(WageredChips[i]);
         }
     }
-    
-    private addText() {
-        this.balanceText = new Text(`Player balance: ${this.game.balance}`);
-        this.balanceText.x = 50;
-        this.balanceText.y = 100;
-        this.balanceText.style.fontSize = TEXT_SMALL.fontSize;
-        this.balanceText.style.fill = TEXT_SMALL.fill;
-        this.balanceText.style.strokeThickness = TEXT_SMALL.strokeThickness;
-        this.balanceText.style.stroke = TEXT_SMALL.stroke;
-        this.container.addChild(this.balanceText);
-        
-        this.wagerText = new Text(`Wager: ${this.game.wager}`);
-        this.wagerText.x = 50;
-        this.wagerText.y = 150;
-        this.wagerText.style.fontSize = TEXT_SMALL.fontSize;
-        this.wagerText.style.fill = TEXT_SMALL.fill;
-        this.wagerText.style.strokeThickness = TEXT_SMALL.strokeThickness;
-        this.wagerText.style.stroke = TEXT_SMALL.stroke;
-        this.container.addChild(this.wagerText);
-    }
-    
-    private updateText() {
-        this.balanceText.text = `Player balance: ${this.game.balance}`;
-        this.wagerText.text = `Wager: ${this.game.wager}`; 
-    }
+
 
     private updateChipCounter(slot: ChipSlot) {
         if (slot?.text) {
@@ -166,8 +142,8 @@ export class WagerState extends GameState {
     }
     
     private async startDealState() {
-        this.disableButtons();
         if (this.game.wager === 0) return;
+        this.disableButtons();
         await this.endAnimations();
         this.new(this.game.playState);
     }
