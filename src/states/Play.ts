@@ -1,5 +1,5 @@
 import { Container, Sprite, Text } from "pixi.js";
-import { Game, GameState, Vector2 } from "../util/HelperTypes";
+import { Game, GameState, Vector2 } from "../util/ClassesAndTypes";
 import { CARD_SCALE, CARD_DIMENSIONS, Card, createShuffledDeck, removeCardFromShuffledDeck, CARD_DISTANCE, CARD_TYPES } from "../logic/Cards";
 import { animateSprite, revealSprite } from "../visual/AnimationTools";
 import { MIDDLE, TEXT_MEDIUM } from "../visual/UI";
@@ -93,7 +93,7 @@ export class PlayState extends GameState {
         if (this.playerSum === 21) {
             await this.stand();
         } else if (this.playerSum > 21) {
-            await this.endRound(END_TYPE.LOSE); // TU JE PROBLEM
+            await this.endRound(END_TYPE.LOSE);
         }
         this.createButtons();
     }
@@ -311,7 +311,7 @@ export class PlayState extends GameState {
         this.dealerSumText.anchor.x = 0.5;
         this.dealerSumText.anchor.y = 0.5;
         this.dealerSumText.x = MIDDLE.x;
-        this.dealerSumText.y = 50;
+        this.dealerSumText.y = 80;
         this.dealerSumText.visible = false;
         this.container.addChild(this.dealerSumText);
     }

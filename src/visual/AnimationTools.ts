@@ -1,5 +1,5 @@
 import { Container, Sprite } from "pixi.js";
-import { Vector2 } from "../util/HelperTypes";
+import { Vector2 } from "../util/ClassesAndTypes";
 import gsap from "gsap";
 import { CARD_DIMENSIONS, Card } from "../logic/Cards";
 

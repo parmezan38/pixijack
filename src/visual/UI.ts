@@ -1,4 +1,4 @@
-import { Vector2 } from "../util/HelperTypes";
+import { Vector2 } from "../util/ClassesAndTypes";
 
 export const WINDOW_SIZE: Vector2 = {
     x: window.innerWidth,

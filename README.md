@@ -17,6 +17,8 @@ npm run start
 # Compile the game into a bundle, which can be found in `dist/`
 npm run build`
 ```
-# Known issues
-- Asset bundles aren't currently watched, so any assets being added or removed would mean you have to run `npm run build-assets` again
-- It may take a while for vite to launch the game on localhost
+
+# Running tests
+```sh
+npm test
+```

@@ -1,5 +1,5 @@
 import { Sprite, Text } from "pixi.js"
-import { Vector2 } from "../util/HelperTypes";
+import { Vector2 } from "../util/ClassesAndTypes";
 
 export const CHIP_SCALE: number = 1;
 export const CHIP_DIMENSIONS: Vector2 = {

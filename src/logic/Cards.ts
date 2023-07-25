@@ -1,4 +1,4 @@
-import { Vector2 } from "../util/HelperTypes";
+import { Vector2 } from "../util/ClassesAndTypes";
 
 // Define cards
 export enum CARD_TYPES {
@@ -16,7 +16,7 @@ enum SUITS {
     SPADES = "spades",
 }
 
-const NUM_OF_DECKS: number = 1; // 4 Deck setup
+const NUM_OF_DECKS: number = 4; // 4 Deck setup
 
 export type Card = {
     name: string, 
@@ -33,12 +33,12 @@ export const CARD_DIMENSIONS: Vector2 = {
 }
 export const CARD_DISTANCE: number = CARD_DIMENSIONS.x * 0.4;
 
-const Deck: Card[] = [];
+export const Deck: Card[] = [];
 
 export const CardImageData: string[] = [];
 
 // Generate cards
-function createNumeralCards() {
+export const createNumeralCards = () => {
     Object.values(SUITS).forEach(value => {
         for (let i = 2; i < 11; i++) {
             const card = createCard(CARD_TYPES.NUMERAL, value, i) 
@@ -82,6 +82,7 @@ function shuffleCards(_deck: Card[]) {
 export const createDeck = () => {
     createNumeralCards();
     createFaceCards();
+    console.log(Deck.length);
 };
 
 export const createShuffledDeck = () => {

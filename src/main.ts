@@ -8,7 +8,7 @@ import {
 import { Chips } from "./logic/Chips";
 
 import { WagerState } from "./states/Wager";
-import { Game, GameState } from "./util/HelperTypes";
+import { Game, GameState } from "./util/ClassesAndTypes";
 import { PlayState } from "./states/Play";
 import { BUTTON_NAMES, MIDDLE, TEXT_SMALL, WINDOW_SIZE } from "./visual/UI";
 
