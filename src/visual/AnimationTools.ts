@@ -21,12 +21,13 @@ export const animateSprite = (
     });
 }
 
-export const revealSprite = (container: Container, back: Sprite, card: Card): Promise<void> => {
-    return new Promise<void>((resolve) => {
+export const revealSprite = (container: Container, back: Sprite, card: Card): Promise<Sprite> => {
+    const front = Sprite.from(card.name);
+
+    return new Promise<Sprite>((resolve) => {
         const scaleX = back.scale.x;
         const positionX = back.position.x;
 
-        const front = Sprite.from(card.name);
         front.anchor.set(0.5);
         front.scale.x = 0;
         front.scale.y = back.scale.y;
@@ -57,10 +58,13 @@ export const revealSprite = (container: Container, back: Sprite, card: Card): Pr
         };
         const phaseTwo = () => {
             front.zIndex -= 1;
+            back.destroy();
             gsap.to(front.position, {
                 x: positionX,
                 duration,
-                onComplete: resolve,
+                onComplete: () => {
+                    resolve(front);
+                },
             });
         };
         gsap.to(back, {

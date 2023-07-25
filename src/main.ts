@@ -21,6 +21,7 @@ game.wager = 0;
 game.deck = []
 game.state = new GameState();
 game.buttonContainer = new Container();
+game.backgroundContainer = new Container();
 
 const width = 1440;
 const height = 1080;
@@ -71,15 +72,19 @@ window.onload = async (): Promise<void> => {
     BUTTON_NAMES.forEach((name: string) => createAsset(name, "ui"));
 
     createAsset("back_card", "cards");
+    createAsset("background_edge", "background");
 
     game.textures = await Assets.load([
         ...chipNames,
         ...CardImageData,
         ...BUTTON_NAMES,
         "back_card",
+        "background_edge",
     ]);
 
     resize();
+    game.app.stage.addChild(game.backgroundContainer);
+    createBackgroundAssets();
     
     game.wagerState = new WagerState(game);
     game.playState = new PlayState(game);
@@ -118,4 +123,9 @@ function addResetButton() {
     dealButton.interactive = true;
     dealButton.onclick = () => {reset()}
     game.buttonContainer.addChild(dealButton);
+}
+
+function createBackgroundAssets() {
+    const edge = Sprite.from(game.textures["background_edge"]);
+    game.backgroundContainer.addChild(edge);
 }

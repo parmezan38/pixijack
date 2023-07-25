@@ -12,19 +12,23 @@ import {
     resetWageredChips
 } from "../logic/Chips";
 import { MIDDLE, TEXT_SMALL, WINDOW_SIZE } from "../visual/UI";
+import { animateSprite } from "../visual/AnimationTools";
 
 export class WagerState extends GameState {
     game: Game = new Game();
     selectableChips: Sprite[] = [];
+    buttonContainer: Container = new Container;
 
     constructor(_game: Game) {
         super();
         this.game = _game;
     }
     
-    public start() {
+    public async start() {
         this.container = new Container();
         this.game.app.stage.addChild(this.container);
+        this.game.app.stage.addChild(this.buttonContainer);
+
 
         this.initializeValues();
 
@@ -32,7 +36,7 @@ export class WagerState extends GameState {
             x: MIDDLE.x - 3*CHIP_DIMENSIONS.x-CHIP_DIMENSIONS.x/2,
             y: WINDOW_SIZE.y - (CHIP_DIMENSIONS.y)
         }
-        this.createSelectableChips(startPos);
+        await this.createSelectableChips(startPos);
         this.addDealButton();
         this.addText();
         this.game.buttonContainer.visible = true;
@@ -45,19 +49,26 @@ export class WagerState extends GameState {
         this.wagerText = new Text("");
     }
 
-    private createSelectableChips(startPos: Vector2) {
+    private async createSelectableChips(startPos: Vector2) {
+        const animations = [];
         for(let i=0; i<Chips.length; i++) {
             const selectChip = Sprite.from(this.game.textures[Chips[i].name]);
+            const position = {
+                x: startPos.x + (i+1)*CHIP_DIMENSIONS.x*1.2,
+                y: startPos.y
+            }
             selectChip.anchor.set(0.5);
             selectChip.scale.x = CHIP_SCALE;
             selectChip.scale.y = CHIP_SCALE;
-            selectChip.x = startPos.x + (i+1)*CHIP_DIMENSIONS.x*1.2;
-            selectChip.y = startPos.y;
+            selectChip.x = position.x;
+            selectChip.y = WINDOW_SIZE.y+CHIP_DIMENSIONS.y;
             selectChip.interactive = true;
-            selectChip.onclick = () => {this.wagerChip(Chips[i], selectChip)}
+            selectChip.onclick = () => {this.wagerChip(Chips[i], selectChip)};
             this.selectableChips.push(selectChip);
             this.container.addChild(selectChip);
+            animations.push(animateSprite(selectChip, position, 0.0, 0.5));
         }
+        await Promise.all(animations);
     }
     
     private createWageredChipSprite(chip: Chip, position: Vector2, i: number) {
@@ -151,12 +162,36 @@ export class WagerState extends GameState {
         dealButton.y = MIDDLE.y;
         dealButton.interactive = true;
         dealButton.onclick = () => {this.startDealState()}
-        this.container.addChild(dealButton);
+        this.buttonContainer.addChild(dealButton);
     }
     
-    private startDealState() {
+    private async startDealState() {
+        this.disableButtons();
         if (this.game.wager === 0) return;
+        await this.endAnimations();
         this.new(this.game.playState);
+    }
+
+    private async endAnimations() {
+        const selectableChipAnimations = [];
+        for(let i=0; i<this.selectableChips.length; i++) {
+            const position = {
+                x: this.selectableChips[i].x,
+                y: WINDOW_SIZE.y+CHIP_DIMENSIONS.y
+            }
+            selectableChipAnimations.push(animateSprite(this.selectableChips[i], position, 0.0, 0.5));
+        }
+        const wageredChipAnimations = [];
+        for(let i=0; i<WageredChips.length; i++) {
+            const position = {
+                x: -CHIP_DIMENSIONS.x,
+                y: -CHIP_DIMENSIONS.y
+            }
+            wageredChipAnimations.push(animateSprite(WageredChips[i].sprite!, position, 0.0, 0.5));
+            wageredChipAnimations.push(animateSprite(WageredChips[i].text!, position, 0.0, 0.5));
+
+        }
+        await Promise.all([...selectableChipAnimations, ...wageredChipAnimations]);
     }
 
     public new(newState: GameState) {
@@ -164,11 +199,17 @@ export class WagerState extends GameState {
         this.game.state = newState;
         this.game.state.start();
     }
+
+    private disableButtons() {
+        this.buttonContainer.removeChildren();
+        this.game.buttonContainer.visible = false;
+    }
     
     public destroy() {
+        this.disableButtons();
         resetWageredChips();
-        this.container.removeAllListeners();
         this.container.removeChildren();
+        this.container.removeAllListeners();
     }
 }
 

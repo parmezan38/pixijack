@@ -26,7 +26,7 @@ export type Card = {
 };
 export type Cards = Card[];
 
-export const CARD_SCALE: number = 0.5;
+export const CARD_SCALE: number = 0.45;
 export const CARD_DIMENSIONS: Vector2 = {
     x: 500 * CARD_SCALE,
     y: 726 * CARD_SCALE

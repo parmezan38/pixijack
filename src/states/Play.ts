@@ -16,7 +16,6 @@ const enum END_TYPE {
     LOSE = "lose",
     DRAW = "draw"
 }
-const delay = (ms: number) => new Promise(res => setTimeout(res, ms));
 
 export class PlayState extends GameState {
     game: Game = new Game();
@@ -189,6 +188,7 @@ export class PlayState extends GameState {
         const hand = this.dealerHand[this.dealerHand.length-1];
         await this.animateCards([hand]);
     }
+
     private addCardToHand(
         card: Card,
         delay: number,
@@ -224,12 +224,12 @@ export class PlayState extends GameState {
         }
         
         this.game.wager = 0;
-        await this.showEndRoundTitle(type);
+        await this.endAnimationsAndTitle(type);
         this.new(this.game.wagerState);
         return
     }
 
-    private async showEndRoundTitle(type: END_TYPE) {
+    private async endAnimationsAndTitle(type: END_TYPE) {
         const str = type === END_TYPE.DRAW ? 'Draw!' : `You ${type}`;
         const text = new Text(str);
         text.style.fontSize = 96;
@@ -241,7 +241,20 @@ export class PlayState extends GameState {
         text.x = MIDDLE.x;
         text.y = MIDDLE.y - CARD_DIMENSIONS.y*0.2;
         this.container.addChild(text);
-        await delay(2000);
+
+        const hands = [...this.playerHand, ...this.dealerHand];
+        const animations = [];
+        for(let i=0; i<hands.length; i++){
+            const sprite = hands[i].sprite;
+            const position = {
+                x: -CARD_DIMENSIONS.x,
+                y: -CARD_DIMENSIONS.y
+            }
+            const delay = i < this.playerHand.length ? 0.3 : 0.9;
+            const duration = 1;
+            animations.push(animateSprite(sprite, position, delay, duration));
+        }
+        await Promise.all(animations);
     }
 
 
@@ -270,7 +283,11 @@ export class PlayState extends GameState {
     }
 
     private async revealCard() {
-        await revealSprite(this.cardContainer, this.dealerHand[0].sprite, this.dealerHand[0].card);
+        const animation = revealSprite(this.cardContainer, this.dealerHand[0].sprite, this.dealerHand[0].card); 
+        await Promise.resolve(animation).then(sprite => {
+            this.dealerHand[0].sprite = sprite;
+        });
+
     }
     
     private addPlayerText() {
