@@ -1,25 +1,24 @@
-import { Container, Sprite } from "pixi.js";
-import { Vector2 } from "../util/ClassesAndTypes";
-import gsap from "gsap";
-import { CARD_DIMENSIONS, Card } from "../logic/Cards";
+import gsap from 'gsap';
+import { Container, Sprite } from 'pixi.js';
+
+import { Card, CARD_DIMENSIONS } from '../logic/Cards';
+import { Vector2 } from '../util/ClassesAndTypes';
 
 
 export const animateSprite = (
     sprite: Sprite,
     destination: Vector2,
     delay: number,
-    duration: number
-    ): Promise<void> => {
-    return new Promise<void>((resolve) => {
-        gsap.to(sprite.position, {
-            x: destination.x,
-            y: destination.y,
-            delay,
-            duration,
-            onComplete: resolve
-        });
+    duration: number,
+): Promise<void> => new Promise<void>((resolve) => {
+    gsap.to(sprite.position, {
+        x: destination.x,
+        y: destination.y,
+        delay,
+        duration,
+        onComplete: resolve,
     });
-}
+});
 
 export const revealSprite = (container: Container, back: Sprite, card: Card): Promise<Sprite> => {
     const front = Sprite.from(card.name);
@@ -38,6 +37,17 @@ export const revealSprite = (container: Container, back: Sprite, card: Card): Pr
         container.addChild(front);
 
         const duration = 0.4;
+        const phaseTwo = () => {
+            front.zIndex -= 1;
+            back.destroy();
+            gsap.to(front.position, {
+                x: positionX,
+                duration,
+                onComplete: () => {
+                    resolve(front);
+                },
+            });
+        };
         const scale2 = () => {
             back.visible = false;
             front.visible = true;
@@ -56,21 +66,12 @@ export const revealSprite = (container: Container, back: Sprite, card: Card): Pr
                 onComplete: scale2,
             });
         };
-        const phaseTwo = () => {
-            front.zIndex -= 1;
-            back.destroy();
-            gsap.to(front.position, {
-                x: positionX,
-                duration,
-                onComplete: () => {
-                    resolve(front);
-                },
-            });
-        };
+
+
         gsap.to(back, {
             x: back.position.x - CARD_DIMENSIONS.x,
             duration,
             onComplete: scale1,
         });
     });
-}
+};

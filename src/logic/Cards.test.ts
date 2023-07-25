@@ -1,8 +1,8 @@
 import {
-    createDeck,
     Card,
+    createDeck,
+    createShuffledDeck,
     Deck,
-    createShuffledDeck
 } from './Cards';
 
 createDeck();
@@ -10,6 +10,7 @@ createDeck();
 describe('Deck', () => {
     it('should not be empty', () => {
         const deck = Deck;
+
         expect(deck.length).not.toBe(0);
     });
 });
@@ -17,9 +18,11 @@ describe('Deck', () => {
 describe('Deck', () => {
     it('should have no duplicates', () => {
         const deck = Deck;
+
         function hasDuplicate(array: Card[]): boolean {
             return array.reduce((duplicateMap, obj) => {
                 const key = `${obj.name}-${obj.suit}`;
+
                 return duplicateMap.set(key, duplicateMap.has(key));
             }, new Map<string, boolean>()).size !== array.length;
         }
@@ -38,9 +41,11 @@ describe('createShuffleDeck', () => {
                     if (card.name === cards2[i].name && card.suit === cards2[i].suit) {
                         return true;
                     }
+
                     return false;
                 });
             }
+            
             return false;
         }
         expect(areEqual(deck, shuffledDeck)).toBeFalsy();

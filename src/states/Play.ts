@@ -1,8 +1,17 @@
-import { Container, Sprite, Text } from "pixi.js";
-import { Game, GameState, Vector2 } from "../util/ClassesAndTypes";
-import { CARD_SCALE, CARD_DIMENSIONS, Card, createShuffledDeck, removeCardFromShuffledDeck, CARD_DISTANCE, CARD_TYPES } from "../logic/Cards";
-import { animateSprite, revealSprite } from "../visual/AnimationTools";
-import { MIDDLE, TEXT_MEDIUM } from "../visual/UI";
+import { Container, Sprite, Text } from 'pixi.js';
+
+import {
+    Card,
+    CARD_DIMENSIONS,
+    CARD_DISTANCE,
+    CARD_SCALE,
+    CARD_TYPES,
+    createShuffledDeck,
+    removeCardFromShuffledDeck,
+} from '../logic/Cards';
+import { Game, GameState, Vector2 } from '../util/ClassesAndTypes';
+import { animateSprite, revealSprite } from '../visual/AnimationTools';
+import { MIDDLE, TEXT_MEDIUM } from '../visual/UI';
 
 type HandCard = {
     card: Card;
@@ -12,25 +21,25 @@ type HandCard = {
 }
 
 const enum END_TYPE {
-    WIN = "win",
-    LOSE = "lose",
-    DRAW = "draw"
+    WIN = 'win',
+    LOSE = 'lose',
+    DRAW = 'draw'
 }
 
 export class PlayState extends GameState {
-    game: Game = new Game();
-    deck: Card[] = [];
-    buttonContainer: Container = new Container;
-    cardContainer: Container = new Container;
-    cardPositions: Vector2[] = [];
+    public game: Game = new Game();
+    public deck: Card[] = [];
+    public buttonContainer: Container = new Container;
+    public cardContainer: Container = new Container;
+    public cardPositions: Vector2[] = [];
     
-    playerHand: HandCard[] = [];
-    playerSum: number = 0;
-    playerSumText: Text = new Text(); 
+    private playerHand: HandCard[] = [];
+    private playerSum = 0;
+    private playerSumText: Text = new Text();
 
-    dealerHand: HandCard[] = [];
-    dealerSum: number = 0;
-    dealerSumText: Text = new Text();
+    private dealerHand: HandCard[] = [];
+    private dealerSum = 0;
+    private dealerSumText: Text = new Text();
     
 
     constructor(_game: Game) {
@@ -42,8 +51,8 @@ export class PlayState extends GameState {
         this.playerHand = [];
         this.dealerHand = [];
 
-        this.balanceText = new Text("");
-        this.wagerText = new Text("");
+        this.balanceText = new Text('');
+        this.wagerText = new Text('');
 
         this.container = new Container();
         this.game.app.stage.addChild(this.container);
@@ -60,21 +69,24 @@ export class PlayState extends GameState {
     private async dealFirst() {
         this.game.buttonContainer.visible = false;
         // Player Hand
-        const playerPos = { 
-            x: MIDDLE.x - CARD_DIMENSIONS.x*0.2,
-            y: MIDDLE.y + CARD_DIMENSIONS.y*0.75
-        }; 
+        const playerPos = {
+            x: MIDDLE.x - CARD_DIMENSIONS.x * 0.2,
+            y: MIDDLE.y + CARD_DIMENSIONS.y * 0.75,
+        };
         const card1 = removeCardFromShuffledDeck(this.deck);
         const card2 = removeCardFromShuffledDeck(this.deck);
+
         this.addCardToHand(card1!, 0.0, true, playerPos);
         this.addCardToHand(card2!, 0.3, true);
+
         // Dealer Hand
         const dealerPos = {
-            x: MIDDLE.x - CARD_DIMENSIONS.x*0.2,
-            y: MIDDLE.y - CARD_DIMENSIONS.y*0.75
-        }
+            x: MIDDLE.x - CARD_DIMENSIONS.x * 0.2,
+            y: MIDDLE.y - CARD_DIMENSIONS.y * 0.75,
+        };
         const card3 = removeCardFromShuffledDeck(this.deck);
         const card4 = removeCardFromShuffledDeck(this.deck);
+
         this.addCardToHand(card3!, 0.6, false, dealerPos, true);
         this.addCardToHand(card4!, 0.9, false);
 
@@ -115,20 +127,22 @@ export class PlayState extends GameState {
         this.updateText();
     }
 
-    private checkIfAce(isPlayer: Boolean) {
+    private checkIfAce(isPlayer: boolean) {
         let sum = isPlayer ? this.playerSum : this.dealerSum;
-        let hand = isPlayer ? this.playerHand : this.dealerHand;
+        const hand = isPlayer ? this.playerHand : this.dealerHand;
         let aceExists = false;
+
         if (sum > 21) {
             hand.forEach((hand: HandCard) => {
                 if(hand.card.type === CARD_TYPES.ACE) {
                     aceExists = true;
                 }
-            }) 
+            });
         }
         if (aceExists) {
             sum -= 10;
         }
+
         return sum;
     }
 
@@ -136,9 +150,10 @@ export class PlayState extends GameState {
         this.disableButtons();
 
         const card = removeCardFromShuffledDeck(this.deck);
+
         this.addCardToHand(card!, 0.0, true);
         
-        const hand = this.playerHand[this.playerHand.length-1];
+        const hand = this.playerHand[this.playerHand.length - 1];
 
         await this.animateCards([hand]);
 
@@ -167,25 +182,24 @@ export class PlayState extends GameState {
             } else {
                 await this.endRound(END_TYPE.DRAW);
             }
+        } else if (this.dealerSum > 21) {
+            await this.endRound(END_TYPE.WIN);
+        } else if (this.dealerSum > this.playerSum){
+            await this.endRound(END_TYPE.LOSE);
+        } else if (this.dealerSum < this.playerSum) {
+            await this.dealDealerAnotherHand();
+            await this.standCheck();
         } else {
-            if (this.dealerSum > 21) {
-                await this.endRound(END_TYPE.WIN);
-            } else if (this.dealerSum > this.playerSum){
-                await this.endRound(END_TYPE.LOSE);
-            } 
-            else if (this.dealerSum < this.playerSum) {
-                await this.dealDealerAnotherHand();
-                await this.standCheck();
-            } else {
-                await this.endRound(END_TYPE.DRAW);
-            }
+            await this.endRound(END_TYPE.DRAW);
         }
     }
 
     private async dealDealerAnotherHand() {
         const card = removeCardFromShuffledDeck(this.deck);
+
         this.addCardToHand(card!, 0.0, false);
-        const hand = this.dealerHand[this.dealerHand.length-1];
+        const hand = this.dealerHand[this.dealerHand.length - 1];
+
         await this.animateCards([hand]);
     }
 
@@ -194,25 +208,29 @@ export class PlayState extends GameState {
         delay: number,
         isPlayer: boolean,
         _position: Vector2|null = null,
-        isBack: boolean = false
-        ) {
+        isBack = false,
+    ) {
         const hand = isPlayer ? this.playerHand : this.dealerHand;
-        const position = _position != null ? _position : this.getPositionFromPrevious(isPlayer);
+        const position = _position !== null ? _position : this.getPositionFromPrevious(isPlayer);
         const sprite = this.createCardSprite(card, isBack);
-        hand.push({ card, delay, sprite, position }); 
+
+        hand.push({ card, delay, sprite, position });
     }
 
     private createCardSprite(_card: Card, isBack: boolean) {
-        const name = isBack ? "back_card" : _card.name;
+        const name = isBack ? 'back_card' : _card.name;
         const card = Sprite.from(this.game.textures[name]);
+
         card.anchor.set(0.5);
         card.scale.x = CARD_SCALE;
         card.scale.y = CARD_SCALE;
         card.x = MIDDLE.x;
-        card.y = 0-CARD_DIMENSIONS.y;
+        card.y = 0 - CARD_DIMENSIONS.y;
         const rand = Math.random();
-        card.rotation = (rand < 0.5 ? rand*-1: rand*1)*0.02;
+
+        card.rotation = (rand < 0.5 ? rand * -1 : rand) * 0.02;
         this.cardContainer.addChild(card);
+
         return card;
     }
 
@@ -226,64 +244,73 @@ export class PlayState extends GameState {
         this.game.wager = 0;
         await this.endAnimationsAndTitle(type);
         this.new(this.game.wagerState);
-        return
+
+        return;
     }
 
     private async endAnimationsAndTitle(type: END_TYPE) {
         const str = type === END_TYPE.DRAW ? 'Draw!' : `You ${type}`;
         const text = new Text(str);
+        
         text.style.fontSize = 96;
-        text.style.fill = "#fffcf5";
+        text.style.fill = '#fffcf5';
         text.style.strokeThickness = 8;
-        text.style.stroke = "#0f0700";
+        text.style.stroke = '#0f0700';
         text.anchor.x = 0.5;
         text.anchor.y = 0.5;
         text.x = MIDDLE.x;
-        text.y = MIDDLE.y - CARD_DIMENSIONS.y*0.2;
+        text.y = MIDDLE.y - CARD_DIMENSIONS.y * 0.2;
         this.container.addChild(text);
 
         const hands = [...this.playerHand, ...this.dealerHand];
         const animations = [];
-        for(let i=0; i<hands.length; i++){
+
+        for(let i = 0; i < hands.length; i++){
             const sprite = hands[i].sprite;
             const position = {
                 x: -CARD_DIMENSIONS.x,
-                y: -CARD_DIMENSIONS.y
-            }
+                y: -CARD_DIMENSIONS.y,
+            };
             const delay = i < this.playerHand.length ? 0.3 : 0.9;
             const duration = 1;
+
             animations.push(animateSprite(sprite, position, delay, duration));
         }
         await Promise.all(animations);
     }
 
 
-    private getPositionFromPrevious(isPlayer: Boolean) {
+    private getPositionFromPrevious(isPlayer: boolean) {
         const hand = isPlayer ? this.playerHand : this.dealerHand;
-        const previousHand = hand[hand.length-1]
+        const previousHand = hand[hand.length -  1];
         const pos = {
             x: previousHand.position.x + CARD_DISTANCE,
-            y: previousHand.position.y
-        }
+            y: previousHand.position.y,
+        };
+
         return pos;
     }
 
     private async animateCards(hands: HandCard[]) {
         const animations = [];
-        for(let i=0; i<hands.length; i++){
+
+        for(let i = 0; i < hands.length; i++){
             const sprite = hands[i].sprite;
             const position = hands[i].position;
-            position.x += Math.random()*(CARD_DIMENSIONS.x*0.04);
-            position.y += Math.random()*(CARD_DIMENSIONS.x*0.05);
-            const delay = hands[i].delay
+
+            position.x += Math.random() * (CARD_DIMENSIONS.x * 0.04);
+            position.y += Math.random() * (CARD_DIMENSIONS.x * 0.05);
+            const delay = hands[i].delay;
             const duration = position.y < MIDDLE.y ? 0.75 : 1;
+
             animations.push(animateSprite(sprite, position, delay, duration));
         }
         await Promise.all(animations);
     }
 
     private async revealCard() {
-        const animation = revealSprite(this.cardContainer, this.dealerHand[0].sprite, this.dealerHand[0].card); 
+        const animation = revealSprite(this.cardContainer, this.dealerHand[0].sprite, this.dealerHand[0].card);
+
         await Promise.resolve(animation).then(sprite => {
             this.dealerHand[0].sprite = sprite;
         });
@@ -302,6 +329,7 @@ export class PlayState extends GameState {
         this.playerSumText.y = MIDDLE.y;
         this.container.addChild(this.playerSumText);
     }
+
     private addDealerText() {
         this.dealerSumText = new Text(`${this.dealerSum}`);
         this.dealerSumText.style.fontSize = TEXT_MEDIUM.fontSize;
@@ -323,28 +351,32 @@ export class PlayState extends GameState {
 
     private createButtons() {
         const hitPos: Vector2 = { x: MIDDLE.x - 100, y: MIDDLE.y };
-        this.createButtonSprite("hit_button", hitPos);
+
+        this.createButtonSprite('hit_button', hitPos);
         
         const standPos: Vector2 = { x: MIDDLE.x + 100, y: MIDDLE.y };
-        this.createButtonSprite("stand_button", standPos);
+        
+        this.createButtonSprite('stand_button', standPos);
         
         this.game.buttonContainer.visible = true;
     }
 
     private createButtonSprite(name: string, pos: Vector2) {
         const button = Sprite.from(this.game.textures[name]);
+        
         button.anchor.set(0.5);
         button.scale.x = 0.8;
         button.scale.y = 0.8;
         button.x = pos.x;
         button.y = pos.y;
         button.interactive = true;
-        if (name === "hit_button") {
-            button.onclick = () => {this.hit()};
-        } else if (name === "stand_button") {
-            button.onclick = () => {this.stand()};
+        if (name === 'hit_button') {
+            button.onclick = () => this.hit();
+        } else if (name === 'stand_button') {
+            button.onclick = () => this.stand();
         }
         this.buttonContainer.addChild(button);
+
         return button;
     }
 
@@ -363,6 +395,7 @@ export class PlayState extends GameState {
         this.disableButtons();
         this.container.removeChildren();
         this.container.removeAllListeners();
+
         return;
     }
 }
